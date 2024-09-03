@@ -33,6 +33,9 @@ EEPROMConfig eC;
 WebserverModule wsMod;
 unsigned long lastTimeTimeSlotsChecked;
 int timeSlotCheckInterval = 1000;
+bool resetWiFi = false;
+bool resetWiFiBlinkLED = false;
+unsigned long resetWiFiTime;
 
 /*
 function run in loop to switch on the relay when any timeslot is on and if 
@@ -72,6 +75,13 @@ void buttonToggleTimerEnable() {
   Serial.printf("button set timer enable to %d\n", eC.getTimerEnabled());
 }
 
+void buttonResetWiFi() {
+  resetWiFi = true;
+  resetWiFiBlinkLED = true;
+  resetWiFiTime = millis();
+  Serial.println("button trigger reset wifi");
+}
+
 void setup() {
   Serial.begin(115200);
 
@@ -81,7 +91,7 @@ void setup() {
   // init button
   button.begin();
   button.setShortPressFunc(buttonToggleRelay);
-  button.setLongPressFunc();
+  button.setLongPressFunc(buttonResetWiFi);
   button.setDoublePressFunc(buttonToggleTimerEnable);
   
   // init relay
@@ -126,4 +136,20 @@ void loop() {
   wsMod.checkWiFiStatusLoop();
 
   checkTimeSlots();
+
+  if (resetWiFiBlinkLED) {
+    statusLED.startTimer(2000, true);
+    statusLED.blink(800, 0.5);
+    resetWiFiBlinkLED = false;
+  }
+
+  if (resetWiFi && millis() - resetWiFiTime > 2100) {
+    Serial.println("resetting wifi...");
+    JsonDocument resetWiFi;
+    resetWiFi["ssid"] = "default-SSID";
+    resetWiFi["pass"] = "password";
+    resetWiFi["ipIndex"] = 2;
+    resetWiFi["port"] = 5555;
+    wsMod.receiveConnection(resetWiFi);
+  }
 }
