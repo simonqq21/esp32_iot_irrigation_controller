@@ -33,6 +33,7 @@ class LED {
         bool _timerOn;
         unsigned long _lastTimeTimerSet;
         unsigned long _onDuration;
-};
+        bool _statusMode = false;
+};      
 
 #endif

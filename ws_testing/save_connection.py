@@ -17,12 +17,13 @@ async def main():
         newIP = "192.168.4.1"
         ssid = "default-ssid"
         password = "password123"
+    ipIndex = 70
     port = 5555
     wsRoute = "ws"
 
     client = Client(ip, port, wsRoute)
     await client.startWS()
-    await client.saveConnection(ssid, password, newIP, port)
+    await client.saveConnection(ssid, password, ipIndex, port)
         
 
 if __name__ == "__main__":

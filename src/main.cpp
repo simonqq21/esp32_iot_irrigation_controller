@@ -8,15 +8,19 @@
 
 /*
 feature list:
+Done:
 . initialize all settings for wifi and rtcntp from the eeprom config
 . when timer is enabled, check all timeslots and switch the relay accordingly.
 . when button is short pressed, toggle relay state manually if timer is disabled.
 . when button is long pressed, reset wifi credentials and restart ESP32.
 . when button is double pressed, toggle timer enabled.
+. when config is set via websockets, check all timeslots again.
 . when relay is set via websockets, switch relay state.
 . when status LED mode is set via websockets, switch LED mode.
 . when gmt offset is set via websockets, update rtcntp websocket.
-. when config is set via websockets, check all timeslots again.
+
+Pending:
+. 
 */
 
 const int ledPin = 18;
@@ -37,17 +41,38 @@ bool resetWiFi = false;
 bool resetWiFiBlinkLED = false;
 unsigned long resetWiFiTime;
 
+unsigned long sendTimeInterval = 1000;
+unsigned long lastTimeTimeSent;
+
 /*
 function run in loop to switch on the relay when any timeslot is on and if 
 timer is enabled.
 */
-void checkTimeSlots() {
+void checkRelayIfOn() {
   if (eC.getTimerEnabled()) {
     if (millis() - lastTimeTimeSlotsChecked >= timeSlotCheckInterval) {
       lastTimeTimeSlotsChecked = millis();
       dtnow = rtcntp.getRTCTime();
       relay.set(eC.checkIfAnyTimeSlotOn(dtnow));
     }
+  }
+  else {
+    relay.set(eC.getRelayManualSetting());
+  }
+}
+
+void setStatusLED() {
+  switch (eC.getLEDSetting())
+  {
+  case LED_ON:
+    statusLED.on();
+    break;
+  case LED_BLINK:
+    statusLED.blink(3000, 0.08);
+    break;
+  default:
+    statusLED.off();
+    break;
   }
 }
 
@@ -56,7 +81,7 @@ toggle relay state when button is short pressed
 */
 void buttonToggleRelay() {
   if (!eC.getTimerEnabled()) {
-    relay.set(!relay.readState());
+    eC.setRelayManualSetting(!relay.readState());
     Serial.printf("button set relay to %d\n", relay.readState());
   }
 }
@@ -80,6 +105,41 @@ void buttonResetWiFi() {
   resetWiFiBlinkLED = true;
   resetWiFiTime = millis();
   Serial.println("button trigger reset wifi");
+}
+
+void checkToResetWiFi() {
+  if (resetWiFiBlinkLED) {
+    statusLED.startTimer(2000, true);
+    statusLED.blink(800, 0.5);
+    resetWiFiBlinkLED = false;
+  }
+
+  if (resetWiFi && millis() - resetWiFiTime > 2100) {
+    Serial.println("resetting wifi...");
+    JsonDocument resetWiFi;
+    resetWiFi["ssid"] = "default-SSID";
+    resetWiFi["pass"] = "password";
+    resetWiFi["ipIndex"] = 2;
+    resetWiFi["port"] = 5555;
+    wsMod.receiveConnection(resetWiFi);
+  }
+}
+
+void updateTime() {
+  if (eC.getNTPEnabled()) {
+    rtcntp.updateRTCWithNTP();
+  }
+  rtcntp.setGMTOffset(eC.getGMTOffset());
+  dtnow = rtcntp.getRTCTime();
+  eC.checkIfAnyTimeSlotOn(dtnow, true);
+}
+
+void sendTime() {
+  if (millis() - lastTimeTimeSent > sendTimeInterval) {
+    lastTimeTimeSent = millis();
+    wsMod.sendDateTime();
+    rtcntp.printTime();
+  }
 }
 
 void setup() {
@@ -111,22 +171,22 @@ void setup() {
   wsMod.setSendRelayStateCallback();
   wsMod.setSendConfigCallback();
   wsMod.setReceiveConnectionCallback();
-  wsMod.setReceiveDateTimeCallback();
+  wsMod.setReceiveDateTimeCallback(updateTime);
   wsMod.setReceiveRelayStateCallback();
-  wsMod.setReceiveConfigCallback();
+  wsMod.setReceiveConfigCallback(updateTime);
   wsMod.connect();
 
   // init rtcntp
   rtcntp.begin();
-  rtcntp.setGMTOffset(eC.getGMTOffset());
   // update RTC with NTP only if NTP is enabled
-  if (eC.getNTPEnabled()) {
-    rtcntp.updateRTCWithNTP();
-  }
+  updateTime();
   dtnow = rtcntp.getRTCTime();
 
   // initialize ec timeslots
   eC.load(dtnow);
+
+  eC.print();
+  rtcntp.printTime();
 }
 
 void loop() {
@@ -135,21 +195,8 @@ void loop() {
   button.loop();
   wsMod.checkWiFiStatusLoop();
 
-  checkTimeSlots();
-
-  if (resetWiFiBlinkLED) {
-    statusLED.startTimer(2000, true);
-    statusLED.blink(800, 0.5);
-    resetWiFiBlinkLED = false;
-  }
-
-  if (resetWiFi && millis() - resetWiFiTime > 2100) {
-    Serial.println("resetting wifi...");
-    JsonDocument resetWiFi;
-    resetWiFi["ssid"] = "default-SSID";
-    resetWiFi["pass"] = "password";
-    resetWiFi["ipIndex"] = 2;
-    resetWiFi["port"] = 5555;
-    wsMod.receiveConnection(resetWiFi);
-  }
+  checkRelayIfOn();
+  setStatusLED();
+  checkToResetWiFi();
+  sendTime();
 }

@@ -165,8 +165,8 @@ void TimeSlot::setOnOffFullDateTimes(DateTime now, bool interrupt) {
     //     _onEndFullTime.day(), _onEndFullTime.hour(), _onEndFullTime.minute(), _onEndFullTime.second());
 }
 
-bool TimeSlot::checkIfOn(DateTime now) {
-    this->setOnOffFullDateTimes(now);
+bool TimeSlot::checkIfOn(DateTime now, bool interrupt) {
+    this->setOnOffFullDateTimes(now, interrupt);
     if (_tS->enabled) {
         if (now >= _onStartFullTime && now <= _onEndFullTime) {
             _currentState = true;
@@ -340,10 +340,11 @@ TimeSlot* EEPROMConfig::getTimeSlot(int index) {
     return _timeslots[index];
 }
 
-bool EEPROMConfig::checkIfAnyTimeSlotOn(DateTime now) {
+bool EEPROMConfig::checkIfAnyTimeSlotOn(DateTime now, bool interrupt) {
+    Serial.println("checking timeslots");
     for (int i=0;i<NUMBER_OF_TIMESLOTS;i++) {
-        Serial.printf("checkIfAnyTimeSlotOn timeslot index %d returns\n", i);
-        if (_timeslots[i]->checkIfOn(now)) {
+        // Serial.printf("checkIfAnyTimeSlotOn timeslot index %d returns\n", i);
+        if (_timeslots[i]->checkIfOn(now, interrupt)) {
             return true;
         }
     }

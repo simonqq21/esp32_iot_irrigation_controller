@@ -231,10 +231,10 @@ class WebserverModule {
         static void handleWebSocketMessage(void *arg, uint8_t *data, size_t len);
 
         // methods to send ESP32 state to client browser
-        static void sendConnection(JsonDocument payloadJSON);
-        static void sendRelayState(JsonDocument inputPayloadJSON);
-        static void sendDateTime(JsonDocument inputPayloadJSON);
-        static void sendConfig(JsonDocument inputPayloadJSON);
+        static void sendConnection(JsonDocument payloadJSON=JsonDocument());
+        static void sendRelayState(JsonDocument inputPayloadJSON=JsonDocument());
+        static void sendDateTime(JsonDocument inputPayloadJSON=JsonDocument());
+        static void sendConfig(JsonDocument inputPayloadJSON=JsonDocument());
         // method to handle requests from the client browser 
         static void handleRequest(String type, JsonDocument payloadJSON); 
         // set callbacks for sending methods

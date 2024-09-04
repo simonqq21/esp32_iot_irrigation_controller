@@ -85,7 +85,7 @@ class TimeSlot {
         void setDuration(unsigned int duration, DateTime now);
         void updateFromDurationToEndTime();
         void setOnOffFullDateTimes(DateTime now, bool interrupt=false);
-        bool checkIfOn(DateTime now);
+        bool checkIfOn(DateTime now, bool interrupt=false);
     private:
         timeSlot* _tS;
         // variables stored in memory, not in EEPROM
@@ -126,7 +126,7 @@ class EEPROMConfig {
         bool getRelayManualSetting();
         void setRelayManualSetting(bool relayManualSetting);
         TimeSlot* getTimeSlot(int index);
-        bool checkIfAnyTimeSlotOn(DateTime now);
+        bool checkIfAnyTimeSlotOn(DateTime now, bool interrupt=false);
 
     private:
         unsigned int _eepromAddr, _connectionConfigAddr, _mainConfigAddr;

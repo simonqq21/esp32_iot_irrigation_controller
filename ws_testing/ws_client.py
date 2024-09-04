@@ -58,8 +58,9 @@ class Client():
         self.port = port
         self.wsRoute = wsRoute
         self.websocketURL = f"ws://{self.ip}:{self.port}/{self.wsRoute}"
-        self.endloop = False;
-    
+        self.endloop = False
+        self.jsonmessage = {}
+
     async def startWS(self):
         self.websocket = await connect(self.websocketURL)
 
@@ -71,8 +72,8 @@ class Client():
             try:
                 # with connect(self.websocketURL) as websocket:
                 message = await self.websocket.recv()
-                jsonmessage = json.loads(message)
-                print(f"JSON message = {json.dumps(jsonmessage, indent=True)}\n")
+                self.jsonmessage = json.loads(message)
+                print(f"JSON message = {json.dumps(self.jsonmessage, indent=True)}\n")
             except:
                 pass
 
@@ -109,13 +110,15 @@ class Client():
         data["payload"] = {}
         await self.websocket.send(json.dumps(data))
 
-    async def loadConfig(self):
+    async def loadConfig(self, recv=False):
         print("load config")
         data = {}
         data["cmd"] = "request"
         data["type"] = "config"
         data["payload"] = {}
         await self.websocket.send(json.dumps(data))
+        if recv:
+            return await self.websocket.recv()
 
     async def saveConnection(self, ssid, password, ipIndex, port):
         print("save connection")
@@ -173,6 +176,10 @@ class Client():
         for i in range(len(timeSlots)):
             data["payload"]["timeSlots"][i]["onStartTime"] = data["payload"]["timeSlots"][i]["onStartTime"].isoformat()
             data["payload"]["timeSlots"][i]["onEndTime"] = data["payload"]["timeSlots"][i]["onEndTime"].isoformat()
+        await self.websocket.send(json.dumps(data))
+
+    async def saveConfig(self, data):
+        print("save config2")
         await self.websocket.send(json.dumps(data))
 
 async def testSequence(client: Client, apMode, changeWiFi=False):

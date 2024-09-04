@@ -361,7 +361,8 @@ void WebserverModule::receiveRelayState(JsonDocument inputPayloadJSON) {
 }
 
 void WebserverModule::receiveDateTime(JsonDocument inputPayloadJSON) {
-    _rtcntp->setISODateTime(inputPayloadJSON["datetime"]);
+    String dtisostr = inputPayloadJSON["datetime"];
+    _rtcntp->setISODateTime(dtisostr);
     Serial.println("saved datetime");
 }
 
