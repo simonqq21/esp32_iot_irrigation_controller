@@ -1,0 +1,18 @@
+short press button when timer is disabled must toggle relay
+double press button toggles timer enable/disable.
+long press button resets the wifi connection and enables AP mode.
+
+datetime is loaded properly upon startup
+when NTP is enabled, datetime is up to date.
+Changing GMT offset when NTP is enabled also changes the system time. 
+changing the manual relay state when the timer is disabled changes the relay.
+changing status LED setting changes the LED behavior instantly.
+
+changing timerEnabled to true when there is a timeslot that is enabled now must turn on
+    the relay.
+Changing a timeslot with the time now to enabled when timerEnabled is true must turn on 
+    the relay.
+Changing a timeslot with the time now to disabled when timerEnabled is true must turn off 
+    the relay.
+Changing timerEnabled to false must set the relay to the mode set in manual mode.
+

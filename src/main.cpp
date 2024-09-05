@@ -126,10 +126,10 @@ void checkToResetWiFi() {
 }
 
 void updateTime() {
+  rtcntp.setGMTOffset(eC.getGMTOffset());
   if (eC.getNTPEnabled()) {
     rtcntp.updateRTCWithNTP();
   }
-  rtcntp.setGMTOffset(eC.getGMTOffset());
   dtnow = rtcntp.getRTCTime();
   eC.checkIfAnyTimeSlotOn(dtnow, true);
 }

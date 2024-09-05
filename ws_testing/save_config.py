@@ -27,7 +27,7 @@ async def main():
     jsonMessage["cmd"] = "save"
     payload = jsonMessage["payload"]
     payload["ledSetting"] = 2
-    payload["ntpEnabledSetting"] = False
+    payload["ntpEnabledSetting"] = True
     payload["timerEnabledSetting"] = True
     payload["timeSlots"][3]["index"] = 3
     payload["timeSlots"][3]["enabled"] = True 
@@ -38,9 +38,6 @@ async def main():
     payload["timeSlots"][2]["onStartTime"] = time(6,30,0).isoformat()
     payload["timeSlots"][2]["onEndTime"] = time(8,0,0).isoformat()
     print(jsonMessage)
-    # await client.saveDateTime(datetime.now())
-    await asyncio.sleep(0.5)
-    # await asyncio.sleep(0.5)
     await client.saveConfig(jsonMessage)
     await client.saveDateTime(datetime(2024,1,2,7,0,0))
 
