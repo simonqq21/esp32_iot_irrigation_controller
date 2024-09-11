@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+
+        <title></title>
+        <link rel="stylesheet" href="style.css">
+        <link rel="stylesheet" href="wifi.css">
+        <script src="wifi.js"></script>
+    </head>
+    <body>
+        <div id="listwifipage">
+            <div id="header">
+                <h1>WiFi configuration</h1>
+                <h2>Connect to a WiFi network.</h2>
+                <span id="systemTimeSpan">
+                    <span>System time: </span>
+                    <span id="systemTime">2000-01-01T00:00:00Z</span>
+                </span>
+            </div>
+            <div id="wifilist">
+                <table id="wifilisttable">
+                    <thead>
+                        <tr class="wifilistheader">
+                            <th>Hotspot name</th>
+                            <th>Security</th>
+                            <th>Signal strength</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr class="wifihotspot">
+                            <td>Hotspot1</td>
+                            <td>open</td>
+                            <td>-20dBm</td>
+                            <td>
+                                <button>Connect</button>
+                            </td>
+                        </tr>
+                        <tr class="wifihotspot">
+                            <td>Hotspot2</td>
+                            <td>wpa2-psk</td>
+                            <td>-30dBm</td>
+                            <td>
+                                <button>Connect</button>
+                            </td>
+                        </tr>
+                        <tr class="wifihotspot">
+                            <td>Hotspot3</td>
+                            <td>wpa2-psk</td>
+                            <td>-40dBm</td>
+                            <td>
+                                <button>Connect</button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>                
+            </div>
+        </div>
+        <div id="wificonnectpage">
+            <div id="passwordinputdiv">
+                <span>WiFi password: </span>
+                <input type="text" width="50">
+            </div>
+            <div id="portinputdiv">
+                <span>Port number: </span>
+                <input type="number" width="10">
+            </div>
+            <div id="ipindexdiv">
+                <span>IP address index: </span>
+                <input type="number" width="10">
+            </div>
+            <button id="wificonnectpagebackbtn">Back</button>
+            <button id="wificonnectpageconnectbtn">Connect</button>
+        </div>
+    </body>
+</html>

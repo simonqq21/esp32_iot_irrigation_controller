@@ -1,0 +1,25 @@
+#header {
+    background-color: red;
+}
+#wifilist {
+    display: grid;
+}
+#wifilistheader {
+    background-color: blue;
+}
+
+.wifilistheader > th {
+    display: inline-block;
+    /* text-align: center; */
+    background-color: blue;
+    border: 2px solid black;
+    min-width: 150px;
+    min-height: 20px;
+}
+
+.wifihotspot > td {
+    /* text-align: center; */
+    background-color: orange;
+    display: inline-block;
+    min-width: 150px;
+}
