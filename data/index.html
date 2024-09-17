@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html>
+    <head>
+
+        <title></title>
+        <link rel="stylesheet" href="style.css">
+        <link rel="stylesheet" href="wifi.css">
+        <script src="index.js"></script>
+    </head>
+    <body>
+        <div id="header">
+            <h1>ESP32 IoT Relay Timer</h1>
+            <span id="systemTimeSpan">
+                <span>System time: </span>
+                <span id="systemTime">2000-01-01T00:00:00Z</span>
+            </span>
+        </div>
+        <div id="configDiv">
+            <form>
+                <div>
+                    <span>Device name: </span>
+                    <input type="text">
+                </div>
+                <div>
+                    <span>Sync time automatically: </span>
+                    <input type="checkbox">
+                </div>
+                <div>
+                    <span>Enable automatic relay timer: </span>
+                    <input type="checkbox">
+                </div>
+                </div>
+                <div>
+                    <span>Status LED setting: </span>
+                    <select name="" id="">
+                        <option value="0">off</option>
+                        <option value="1">on</option>
+                        <option value="2">blinking</option>
+                    </select>
+                </div>
+                <div>
+                    <span>Set date and time manually: </span>
+                    <input type="datetime-local">
+                </div>
+                <div>
+                    <a href="wifi.html">Configure WiFi</a>
+                </div>
+            </form>
+        </div>
+        <div id="timeSlotsDiv">
+            <div style="border: 2px solid black;">
+                <div>
+                    <span>Timeslot 0</span>
+                </div>
+                <span>
+                    <span>Enabled:</span>
+                    <input type="checkbox">
+                </span>
+                <div>
+                    <span>
+                        <span>Start time: </span>
+                        <input type="datetime-local">
+                    </span>
+                    <span>
+                        <span>End time: </span>
+                        <input type="datetime-local">
+                    </span>
+                    <span>
+                        <span>Duration: </span>
+                        <input type="number"> s
+                    </span>
+                </div>
+            </div>
+
+            <div style="border: 2px solid black;">
+                <div>
+                    <span>Timeslot 1</span>
+                </div>
+                <span>
+                    <span>Enabled:</span>
+                    <input type="checkbox">
+                </span>
+                <div>
+                    <span>
+                        <span>Start time: </span>
+                        <input type="datetime-local">
+                    </span>
+                    <span>
+                        <span>End time: </span>
+                        <input type="datetime-local">
+                    </span>
+                    <span>
+                        <span>Duration: </span>
+                        <input type="number"> s
+                    </span>
+                </div>
+            </div>
+
+            <div style="border: 2px solid black;">
+                <div>
+                    <span>Timeslot 2</span>
+                </div>
+                <span>
+                    <span>Enabled:</span>
+                    <input type="checkbox">
+                </span>
+                <div>
+                    <span>
+                        <span>Start time: </span>
+                        <input type="datetime-local">
+                    </span>
+                    <span>
+                        <span>End time: </span>
+                        <input type="datetime-local">
+                    </span>
+                    <span>
+                        <span>Duration: </span>
+                        <input type="number"> s
+                    </span>
+                </div>
+            </div>
+        </div>
+        <div id="saveBtnDiv">
+            <button>Save settings</button>
+        </div>
+    </body>
+</html>

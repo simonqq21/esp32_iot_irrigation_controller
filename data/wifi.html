@@ -2,7 +2,7 @@
 <html lang="en">
     <head>
 
-        <title></title>
+        <title>ESP32 WiFi configuration</title>
         <link rel="stylesheet" href="style.css">
         <link rel="stylesheet" href="wifi.css">
         <script src="wifi.js"></script>
@@ -10,7 +10,7 @@
     <body>
         <div id="listwifipage">
             <div id="header">
-                <h1>WiFi configuration</h1>
+                <h1>ESP32 WiFi configuration</h1>
                 <h2>Connect to a WiFi network.</h2>
                 <span id="systemTimeSpan">
                     <span>System time: </span>
@@ -56,7 +56,7 @@
                 </table>                
             </div>
         </div>
-        <div id="wificonnectpage">
+        <form id="wificonnectpage">
             <div id="passwordinputdiv">
                 <span>WiFi password: </span>
                 <input type="text" width="50">
@@ -71,6 +71,6 @@
             </div>
             <button id="wificonnectpagebackbtn">Back</button>
             <button id="wificonnectpageconnectbtn">Connect</button>
-        </div>
+        </form>
     </body>
 </html>
