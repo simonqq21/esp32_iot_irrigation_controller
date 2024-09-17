@@ -19,20 +19,20 @@
             <form>
                 <div>
                     <span>Device name: </span>
-                    <input type="text">
+                    <input id="deviceNameInput" type="text">
                 </div>
                 <div>
                     <span>Sync time automatically: </span>
-                    <input type="checkbox">
+                    <input id="ntpEnableInput" type="checkbox">
                 </div>
                 <div>
                     <span>Enable automatic relay timer: </span>
-                    <input type="checkbox">
+                    <input id="timerEnableInput" type="checkbox">
                 </div>
                 </div>
                 <div>
                     <span>Status LED setting: </span>
-                    <select name="" id="">
+                    <select name="" id="ledModeInput">
                         <option value="0">off</option>
                         <option value="1">on</option>
                         <option value="2">blinking</option>
@@ -40,7 +40,7 @@
                 </div>
                 <div>
                     <span>Set date and time manually: </span>
-                    <input type="datetime-local">
+                    <input id="systemTimeInput" type="datetime-local">
                 </div>
                 <div>
                     <a href="wifi.html">Configure WiFi</a>
@@ -48,7 +48,7 @@
             </form>
         </div>
         <div id="timeSlotsDiv">
-            <div style="border: 2px solid black;">
+            <div class="timeSlot" data-index="0" style="border: 2px solid black;">
                 <div>
                     <span>Timeslot 0</span>
                 </div>
@@ -72,13 +72,13 @@
                 </div>
             </div>
 
-            <div style="border: 2px solid black;">
+            <div class="timeSlot" data-index="1" style="border: 2px solid black;">
                 <div>
                     <span>Timeslot 1</span>
                 </div>
                 <span>
                     <span>Enabled:</span>
-                    <input type="checkbox">
+                    <input class="tsEnabledInput" type="checkbox">
                 </span>
                 <div>
                     <span>
@@ -96,7 +96,7 @@
                 </div>
             </div>
 
-            <div style="border: 2px solid black;">
+            <div class="timeSlot" data-index="2" style="border: 2px solid black;">
                 <div>
                     <span>Timeslot 2</span>
                 </div>
@@ -121,7 +121,7 @@
             </div>
         </div>
         <div id="saveBtnDiv">
-            <button>Save settings</button>
+            <button id="saveBtn">Save settings</button>
         </div>
     </body>
 </html>

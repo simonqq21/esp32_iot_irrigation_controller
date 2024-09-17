@@ -13,8 +13,6 @@ document.addEventListener("DOMContentLoaded", function() {
     let connectPort;
     let connectIPIndex;
 
-
-
     function requestWifis(ws) {
         msg = {cmd: "request",
             type: "wifis",
