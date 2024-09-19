@@ -1,9 +1,9 @@
-import { requestWifis, sendConnection } from './wsMod.js';
+import { receiveData, requestWifis, saveConnection } from './wsMod.js';
 
 document.addEventListener("DOMContentLoaded", function() {
     // set page to the WiFi hotspot list upon load.
     setPage("listwifi");
-    
+
     let portValTemp = 5555;
     // let hostname = window.location.hostname;
     let hostname = "192.168.5.70";
@@ -26,7 +26,7 @@ document.addEventListener("DOMContentLoaded", function() {
      * @typedef {Object} payload - the payload object containing the ISO datetime string.
      * @param {String} payload.datetime - the ISO datetime string of the ESP32 system time.
      */
-    function updateDisplayTime(payload) {
+    function updateDisplayedTime(payload) {
         document.getElementById("systemTime").textContent = payload["datetime"];
     }
     
@@ -39,7 +39,7 @@ document.addEventListener("DOMContentLoaded", function() {
      * @param {String} payload.wifis[].security - the security type of each WiFi hotspot 
      * @param {Number} payload.wifis[].rssi - the signal strength of each WiFi hotspot
      */
-    function updateWiFis(payload) {
+    function updateWiFiTable(payload) {
         console.log(JSON.stringify(payload));
         // get the table body of the WiFi hotspot list table
         let wifilisttbody = document.getElementById("wifilisttable").getElementsByTagName("tbody")[0];
@@ -140,21 +140,13 @@ document.addEventListener("DOMContentLoaded", function() {
 
     // websocket message handler
     ws.addEventListener("message", (event) => {
-        // console.log(`message received: ${event.data}`);
-        let jsonMsg = JSON.parse(event.data);
-        let cmd = jsonMsg['cmd'];
-        let type = jsonMsg['type'];
-        let payload = jsonMsg["payload"];
-
-        if (cmd == "load") {
-            if (type == "datetime") {
-                updateDisplayTime(payload);
-            }
-            else if (type == "wifis") {
-                updateWiFis(payload);
-            }
+        // define callbacks for receiving different types of data
+        // callbacks[cmd][type] = function(payload)
+        let callbacks = {
+            "datetime": updateDisplayedTime,
+            "wifis": updateWiFiTable,
         }
-        console.log(`${cmd}, ${type}, ${JSON.stringify(payload)}`);
+        receiveData(event, callbacks);
     });
 
     // websocket close handler
@@ -197,14 +189,13 @@ document.addEventListener("DOMContentLoaded", function() {
     // and out-of-the-box standalone use.
     document.getElementById("wificonnectpageconnectbtn").addEventListener("click", function(event) {
         event.preventDefault();
-        sendConnection(ws, 
-            {
-                ssid: ssidVal, 
-                pass: passVal, 
-                ipIndex: ipIndexVal, 
-                port: portVal
-            }
-        );
-
+        let payload = {
+            ssid: ssidVal, 
+            pass: passVal, 
+            ipIndex: ipIndexVal, 
+            port: portVal
+        };
+        console.log(`sendConnection: payload=${JSON.stringify(payload)}`);
+        saveConnection(ws, payload);
     });
 });
