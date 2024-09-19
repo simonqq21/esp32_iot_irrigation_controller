@@ -1,46 +1,21 @@
+import { requestWifis, sendConnection } from './wsMod.js';
+
 document.addEventListener("DOMContentLoaded", function() {
-    let port = 5555;
+    let portValTemp = 5555;
     // let hostname = window.location.hostname;
-    let hostname = "192.168.5.71";
+    let hostname = "192.168.5.70";
     // let hostname = "192.168.4.1";
-    let url = `ws://${hostname}:${port}/ws`;
+    // let hostname = "192.168.34.2";
+    let url = `ws://${hostname}:${portValTemp}/ws`;
     console.log(`hostname=${hostname}`);
     let ws = new WebSocket(url);
 
-    let connectSSID;
-    let connectSecurity;
-    let connectPass;
-    let connectPort;
-    let connectIPIndex;
-
-    function requestWifis(ws) {
-        msg = {cmd: "request",
-            type: "wifis",
-        };
-        ws.send(JSON.stringify(msg));
-    }
-    
-    function requestDateTime(ws) {
-        msg = {cmd: "request",
-            type: "datetime",
-        };
-        ws.send(JSON.stringify(msg));
-    }
-    
-    function sendConnection(ws) {
-        msg = {};
-        msg["cmd"] = "save";
-        msg["type"] = "connection";
-        msg["payload"] = {};
-        payload = msg["payload"];
-        payload["ssid"] = connectSSID;
-        payload["pass"] = connectPass;
-        payload["ipIndex"] = connectIPIndex;
-        payload["port"] = connectPort;
-        console.log(JSON.stringify(msg));
-        ws.send(JSON.stringify(msg));
-    }
-    
+    let ssidVal = "";
+    let securityVal = "open";
+    let passVal = "";
+    let portVal = -1;
+    let ipIndexVal = -1;
+  
     function updateDisplayTime(payload) {
         document.getElementById("systemTime").textContent = payload["datetime"];
     }
@@ -54,7 +29,7 @@ document.addEventListener("DOMContentLoaded", function() {
             wifilisttbody.removeChild(wifilistrows[0]);
         }
         let wifiIndex = 0;
-        for (wifi of payload["wifis"]) {
+        for (let wifi of payload["wifis"]) {
             console.log(wifi["ssid"]);
             let wifitablerow = document.createElement("tr");
             wifitablerow.classList.add("wifihotspot");
@@ -80,9 +55,8 @@ document.addEventListener("DOMContentLoaded", function() {
             wificonnectbtn.textContent = "Connect";
             wificonnectbtn.addEventListener("click", function() {
                 let wifilistrow = this.parentElement.parentElement;
-                connectSSID = wifilistrow.getElementsByClassName("wifiname")[0].textContent;
-                connectSecurity = wifilistrow.getElementsByClassName("wifisecurity")[0].textContent;
-                // alert(connectSecurity);
+                ssidVal = wifilistrow.getElementsByClassName("wifiname")[0].textContent;
+                securityVal = wifilistrow.getElementsByClassName("wifisecurity")[0].textContent;
                 setPage("connect");
             });
             wificonnectbtn.id = "";
@@ -107,8 +81,8 @@ document.addEventListener("DOMContentLoaded", function() {
         else if (pagename == "connect") {
             listwifipage.style.display = "none";
             wificonnectpage.style.display = "block";
-            console.log(connectSecurity);
-            if (connectSecurity == "open") {
+            console.log(securityVal);
+            if (securityVal == "open") {
                 document.getElementById("passwordinputdiv").style.display = "none";
             }
             else {
@@ -116,9 +90,6 @@ document.addEventListener("DOMContentLoaded", function() {
             }
         }
     }
-
-
-
 
     ws.addEventListener("open", (event) => {
         requestWifis(ws);
@@ -151,27 +122,35 @@ document.addEventListener("DOMContentLoaded", function() {
     let connectIPIndexInput = document.getElementById("ipindexdiv").getElementsByTagName("input")[0];
 
     connectPassInput.addEventListener("change", function() {
-        connectPass = connectPassInput.value;
+        passVal = connectPassInput.value;
         // alert(connectPass);
     });
 
     connectPortInput.addEventListener("change", function() {
-        connectPort = connectPortInput.value;
+        portVal = connectPortInput.value;
         // alert(connectPort);
     });
 
     connectIPIndexInput.addEventListener("change", function() {
-        connectIPIndex = connectIPIndexInput.value;
+        ipIndexVal = connectIPIndexInput.value;
         // alert(connectIPIndex);
     });
 
-    document.getElementById("wificonnectpagebackbtn").addEventListener("click", function() {
+    document.getElementById("wificonnectpagebackbtn").addEventListener("click", function(event) {
         setPage("listwifi");
     });
     
-    document.getElementById("wificonnectpageconnectbtn").addEventListener("click", function() {
-        console.log("Connect!");
-        sendConnection(ws);
+    document.getElementById("wificonnectpageconnectbtn").addEventListener("click", function(event) {
+        event.preventDefault();
+        sendConnection(ws, 
+            {
+                ssid: ssidVal, 
+                pass: passVal, 
+                ipIndex: ipIndexVal, 
+                port: portVal
+            }
+        );
+
     });
 
     setPage("listwifi");
