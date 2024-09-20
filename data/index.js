@@ -45,15 +45,51 @@ document.addEventListener("DOMContentLoaded", function() {
                 onEndTime: new Date(2024, 1, 1, 0, 4, 0),
             }
         ]
-    }
-    /**
-     * 
-     */
-     
+    };
 
-    let element = document.querySelector('.timeSlot[data-index="1"]');
-    console.log(element);
-    element.getElementsByClassName('tsEnabledInput')[0].checked = true;
-    console.log(element.getElementsByClassName('tsEnabledInput')[0].checked);
+    // request for the date and time, relay state, and configuration upon websocket open
+    ws.addEventListener("open", (event) => {
+        wsMod.requestDateTime(ws);
+        wsMod.requestRelayState(ws);
+        wsMod.requestConfig(ws);
+    })
+
+    // websocket message handler
+    ws.addEventListener("message", (event) => {
+        // define callbacks for receiving different types of data
+        // callbacks[cmd][type] = function(payload)
+        let callbacks = {
+            // "datetime": ,
+            // "relay_state": ,
+            // "config": ,
+        }
+        wsMod.receiveData(event, callbacks);
+    });
+
+    // websocket close handler
+    ws.addEventListener("close", (event) => {
+        console.log("ws closed");
+    });
+
+    /**
+     * Callback function to update displayed system date and time
+     */
+    function updateDisplayedTime(payload) {
+        document.getElementById("systemTime").textContent = payload["datetime"];
+    }
+
+    /**
+     * Callback function to update displayed relay state
+     */
+
+    /**
+     * Callback function to update displayed configuration
+     */
+
+
+    // let element = document.querySelector('.timeSlot[data-index="1"]');
+    // console.log(element);
+    // element.getElementsByClassName('tsEnabledInput')[0].checked = true;
+    // console.log(element.getElementsByClassName('tsEnabledInput')[0].checked);
     
 });
