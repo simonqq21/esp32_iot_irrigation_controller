@@ -1,4 +1,4 @@
-import { receiveData, requestWifis, saveConnection } from './wsMod.js';
+import * as wsMod from './wsMod.js';
 
 document.addEventListener("DOMContentLoaded", function() {
     // set page to the WiFi hotspot list upon load.
@@ -14,11 +14,13 @@ document.addEventListener("DOMContentLoaded", function() {
     let ws = new WebSocket(url);
 
     // WiFi ssid, security, password, port, and IP address index variables
-    let ssidVal = "";
-    let securityVal = "open";
-    let passVal = "";
-    let portVal = -1;
-    let ipIndexVal = -1;
+    let connectionConfig = {
+        ssidVal: "",
+        securityVal: "",
+        passVal: "",
+        portVal: "",
+        ipIndexVal: -1,
+    };
     
     /**
      * Updates the displayed system time. 
@@ -88,8 +90,8 @@ document.addEventListener("DOMContentLoaded", function() {
             // hotspot are saved, then the connection menu is opened.
             wificonnectbtn.addEventListener("click", function() {
                 let wifilistrow = this.parentElement.parentElement;
-                ssidVal = wifilistrow.getElementsByClassName("wifiname")[0].textContent;
-                securityVal = wifilistrow.getElementsByClassName("wifisecurity")[0].textContent;
+                connectionConfig.ssidVal = wifilistrow.getElementsByClassName("wifiname")[0].textContent;
+                connectionConfig.securityVal = wifilistrow.getElementsByClassName("wifisecurity")[0].textContent;
                 setPage("connect");
             });
             wificonnectbtntd.appendChild(wificonnectbtn);
@@ -120,11 +122,14 @@ document.addEventListener("DOMContentLoaded", function() {
             wificonnectpage.style.display = "none";
         }
         else if (pagename == "connect") {
+            // set WiFi SSID text
+            let ssidNameSpan = document.getElementById("ssidNameSpan");
+            ssidNameSpan.textContent = connectionConfig.ssidVal;
             listwifipage.style.display = "none";
             wificonnectpage.style.display = "block";
-            console.log(securityVal);
+            console.log(connectionConfig.securityVal);
             // only display the password input if the selected WiFi hotspot requires a PIN/password to connect.
-            if (securityVal == "open") {
+            if (connectionConfig.securityVal == "open") {
                 document.getElementById("passwordinputdiv").style.display = "none";
             }
             else {
@@ -135,7 +140,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
     // request for the list of scanned WiFi hotspots upon websocket open
     ws.addEventListener("open", (event) => {
-        requestWifis(ws);
+        wsMod.requestWifis(ws);
     })
 
     // websocket message handler
@@ -146,7 +151,7 @@ document.addEventListener("DOMContentLoaded", function() {
             "datetime": updateDisplayedTime,
             "wifis": updateWiFiTable,
         }
-        receiveData(event, callbacks);
+        wsMod.receiveData(event, callbacks);
     });
 
     // websocket close handler
@@ -161,19 +166,19 @@ document.addEventListener("DOMContentLoaded", function() {
 
     // save password to variable upon input change
     connectPassInput.addEventListener("change", function() {
-        passVal = connectPassInput.value;
+        connectionConfig.passVal = connectPassInput.value;
         // alert(connectPass);
     });
 
     // save port number to variable upon input change 
     connectPortInput.addEventListener("change", function() {
-        portVal = connectPortInput.value;
+        connectionConfig.portVal = connectPortInput.value;
         // alert(connectPort);
     });
 
     // save IP address index number to variable upon input change 
     connectIPIndexInput.addEventListener("change", function() {
-        ipIndexVal = connectIPIndexInput.value;
+        connectionConfig.ipIndexVal = connectIPIndexInput.value;
         // alert(connectIPIndex);
     });
 
@@ -190,12 +195,12 @@ document.addEventListener("DOMContentLoaded", function() {
     document.getElementById("wificonnectpageconnectbtn").addEventListener("click", function(event) {
         event.preventDefault();
         let payload = {
-            ssid: ssidVal, 
-            pass: passVal, 
-            ipIndex: ipIndexVal, 
-            port: portVal
+            ssid: connectionConfig.ssidVal, 
+            pass: connectionConfig.passVal, 
+            ipIndex: connectionConfig.ipIndexVal, 
+            port: connectionConfig.portVal
         };
         console.log(`sendConnection: payload=${JSON.stringify(payload)}`);
-        saveConnection(ws, payload);
+        // saveConnection(ws, payload);
     });
 });

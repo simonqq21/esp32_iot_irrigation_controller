@@ -88,6 +88,7 @@ function saveData(ws, typeOfData, payload) {
     console.log(JSON.stringify(msg));
     ws.send(JSON.stringify(msg));
 }
+
 /**
  * Save connection credentials and configuration to the ESP32.
  * @param {WebSocket} ws - websocket instance
@@ -101,6 +102,7 @@ function saveData(ws, typeOfData, payload) {
 export function saveConnection(ws, payload) {
     saveData(ws, "connection", payload);
 }
+
 /**
  * Save manual relay state to the ESP32.
  * @param {WebSocket} ws - websocket instance
@@ -111,6 +113,7 @@ export function saveConnection(ws, payload) {
 export function saveRelayState(ws, payload) {
     saveData(ws, "relay_state", payload);
 }
+
 /**
  * Save system date and time to the ESP32.
  * @param {WebSocket} ws - websocket instance
@@ -121,6 +124,7 @@ export function saveRelayState(ws, payload) {
 export function saveDateTime(ws, payload) {
     saveData(ws, "datetime", payload);
 }
+
 /**
  * Save  main configuration to the ESP32.
  * @param {WebSocket} ws - websocket instance
