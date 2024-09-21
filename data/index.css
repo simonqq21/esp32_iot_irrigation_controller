@@ -1,0 +1,23 @@
+#relayStatusIndicator {
+    display: inline-block;
+    width: 16px;
+    height: 16px; 
+    border-radius: 50%;
+    border: 2px solid black;
+}  
+
+.off {
+    background-color: red;
+}
+
+.on {
+    background-color: green;
+}
+
+#relayStateDiv {
+    display: flex; align-items: center;
+}
+
+#relayStateDiv > * {
+    margin-right: 20px;
+}

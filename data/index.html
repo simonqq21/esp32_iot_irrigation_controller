@@ -4,16 +4,24 @@
 
         <title></title>
         <link rel="stylesheet" href="style.css">
-        <link rel="stylesheet" href="wifi.css">
+        <link rel="stylesheet" href="index.css">
         <script src="index.js" type="module"></script>
     </head>
     <body>
         <div id="header">
             <h1>ESP32 IoT Relay Timer</h1>
-            <span id="systemTimeSpan">
+            
+        </div>
+        <div id="statusDiv">
+            <div id="systemTimeDiv">
                 <span>System time: </span>
                 <span id="systemTime">2000-01-01T00:00:00Z</span>
-            </span>
+            </div>
+            <div id="relayStateDiv">
+                <span>Relay state: </span>
+                <span id="relayStatusIndicator" class="on"></span>
+                <span>On</span>
+            </div>
         </div>
         <div id="configDiv">
             <form>
@@ -26,9 +34,8 @@
                     <input id="ntpEnableInput" type="checkbox">
                 </div>
                 <div>
-                    <span>Enable automatic relay timer: </span>
-                    <input id="timerEnableInput" type="checkbox">
-                </div>
+                    <span>Set date and time manually: </span>
+                    <input id="systemTimeInput" type="datetime-local">
                 </div>
                 <div>
                     <span>Status LED setting: </span>
@@ -39,8 +46,9 @@
                     </select>
                 </div>
                 <div>
-                    <span>Set date and time manually: </span>
-                    <input id="systemTimeInput" type="datetime-local">
+                    <span>Enable automatic relay timer: </span>
+                    <input id="timerEnableInput" type="checkbox">
+                </div>
                 </div>
                 <div>
                     <a href="wifi.html">Configure WiFi</a>

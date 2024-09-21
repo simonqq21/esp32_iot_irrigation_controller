@@ -3,7 +3,7 @@ import * as wsMod from './wsMod.js';
 document.addEventListener("DOMContentLoaded", function() {
     let port = 5555;
     // let hostname = window.location.hostname;
-    let hostname = "192.168.5.71";
+    let hostname = "192.168.5.70";
     // let hostname = "192.168.4.1";
     let url = `ws://${hostname}:${port}/ws`;
     console.log(`hostname=${hostname}`);
@@ -16,6 +16,7 @@ document.addEventListener("DOMContentLoaded", function() {
     .create variables to hold the local configuration
     */
     
+    // variables for configuration and data
     let curDateTimeVal = new Date(Date.UTC(2024, 0, 1, 0, 0, 0)).toISOString();
     console.log(curDateTimeVal);
     let curRelayStateVal = false;
@@ -59,9 +60,9 @@ document.addEventListener("DOMContentLoaded", function() {
         // define callbacks for receiving different types of data
         // callbacks[cmd][type] = function(payload)
         let callbacks = {
-            // "datetime": ,
-            // "relay_state": ,
-            // "config": ,
+            "datetime": updateDisplayedTime,
+            "relay_state": updateDisplayedRelayState,
+            "config": updateDisplayedConfig,
         }
         wsMod.receiveData(event, callbacks);
     });
@@ -81,11 +82,16 @@ document.addEventListener("DOMContentLoaded", function() {
     /**
      * Callback function to update displayed relay state
      */
+    function updateDisplayedRelayState(payload) {
+        console.log(JSON.stringify(payload));
+    }
 
     /**
      * Callback function to update displayed configuration
      */
-
+    function updateDisplayedConfig(payload) {
+        console.log(JSON.stringify(payload));
+    }
 
     // let element = document.querySelector('.timeSlot[data-index="1"]');
     // console.log(element);
