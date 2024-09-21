@@ -20,7 +20,10 @@
             <div id="relayStateDiv">
                 <span>Relay state: </span>
                 <span id="relayStatusIndicator" class="on"></span>
-                <span>On</span>
+                <span id="relayStatusText">On</span>
+            </div>
+            <div>
+                <a href="wifi.html">Configure WiFi</a>
             </div>
         </div>
         <div id="configDiv">
@@ -50,10 +53,11 @@
                     <input id="timerEnableInput" type="checkbox">
                 </div>
                 </div>
-                <div>
-                    <a href="wifi.html">Configure WiFi</a>
-                </div>
             </form>
+        </div>
+        <div id="manualRelayDiv">
+            <span>Set relay state: </span>
+            <input type="checkbox">
         </div>
         <div id="timeSlotsDiv">
             <div class="timeSlot" data-index="0" style="border: 2px solid black;">
@@ -67,11 +71,11 @@
                 <div>
                     <span>
                         <span>Start time: </span>
-                        <input type="datetime-local">
+                        <input type="time">
                     </span>
                     <span>
                         <span>End time: </span>
-                        <input type="datetime-local">
+                        <input type="time">
                     </span>
                     <span>
                         <span>Duration: </span>
@@ -91,11 +95,11 @@
                 <div>
                     <span>
                         <span>Start time: </span>
-                        <input type="datetime-local">
+                        <input type="time">
                     </span>
                     <span>
                         <span>End time: </span>
-                        <input type="datetime-local">
+                        <input type="time">
                     </span>
                     <span>
                         <span>Duration: </span>
@@ -115,11 +119,11 @@
                 <div>
                     <span>
                         <span>Start time: </span>
-                        <input type="datetime-local">
+                        <input type="time">
                     </span>
                     <span>
                         <span>End time: </span>
-                        <input type="datetime-local">
+                        <input type="time">
                     </span>
                     <span>
                         <span>Duration: </span>

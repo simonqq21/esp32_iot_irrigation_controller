@@ -42,6 +42,7 @@ bool resetWiFiBlinkLED = false;
 unsigned long resetWiFiTime;
 
 unsigned long sendTimeInterval = 1000;
+
 unsigned long lastTimeTimeSent;
 
 /*
@@ -49,15 +50,20 @@ function run in loop to switch on the relay when any timeslot is on and if
 timer is enabled.
 */
 void checkRelayIfOn() {
+  bool newRelayState;
   if (eC.getTimerEnabled()) {
     if (millis() - lastTimeTimeSlotsChecked >= timeSlotCheckInterval) {
       lastTimeTimeSlotsChecked = millis();
       dtnow = rtcntp.getRTCTime();
-      relay.set(eC.checkIfAnyTimeSlotOn(dtnow));
+      newRelayState = eC.checkIfAnyTimeSlotOn(dtnow);
     }
   }
   else {
-    relay.set(eC.getRelayManualSetting());
+    newRelayState = eC.getRelayManualSetting();
+  }
+  if (newRelayState != relay.readState()) {
+    relay.set(newRelayState);
+    wsMod.sendCurrentRelayState(newRelayState);
   }
 }
 

@@ -239,7 +239,18 @@ void WebserverModule::sendConnection(JsonDocument inputPayloadJSON) {
     _ws.textAll(_strData);
 }
 
-void WebserverModule::sendRelayState(JsonDocument inputPayloadJSON) {
+void WebserverModule::sendCurrentRelayState(bool curRelayState) {
+    _jsonDoc.clear();
+    _jsonDoc[CMD_KEY] = LOAD_CMD;
+    _jsonDoc[TYPE_KEY] = RELAY_STATE_TYPE;
+    JsonObject payloadJSON = _jsonDoc[PAYLOAD_KEY].to<JsonObject>();
+    payloadJSON["relay_state"] = curRelayState;
+    serializeJson(_jsonDoc, _strData);
+    Serial.printf("serialized JSON = %s\n", _strData);
+    _ws.textAll(_strData);
+}
+
+void WebserverModule::sendSavedManualRelayState(JsonDocument inputPayloadJSON) {
     _jsonDoc.clear();
     _jsonDoc[CMD_KEY] = LOAD_CMD;
     _jsonDoc[TYPE_KEY] = RELAY_STATE_TYPE;
@@ -300,7 +311,7 @@ void WebserverModule::handleRequest(String type, JsonDocument payloadJSON) {
         }
     }
     else if (type == RELAY_STATE_TYPE) {
-        sendRelayState(payloadJSON);
+        sendSavedManualRelayState(payloadJSON);
         if (_sendRelayStateFunc != NULL) {
             _sendRelayStateFunc();
         }

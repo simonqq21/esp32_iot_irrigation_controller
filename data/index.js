@@ -84,6 +84,19 @@ document.addEventListener("DOMContentLoaded", function() {
      */
     function updateDisplayedRelayState(payload) {
         console.log(JSON.stringify(payload));
+        const relayStatusTextElement = document.getElementById("relayStatusText");
+        const relayStatusIndicatorElement = document.getElementById("relayStatusIndicator");
+
+        if (payload["relay_state"]) {
+            relayStatusTextElement.textContent = "On";
+            relayStatusIndicatorElement.classList.add("on");
+            relayStatusIndicatorElement.classList.remove("off");
+        }
+        else {
+            relayStatusTextElement.textContent = "Off";
+            relayStatusIndicatorElement.classList.add("off");
+            relayStatusIndicatorElement.classList.remove("on");
+        }
     }
 
     /**
