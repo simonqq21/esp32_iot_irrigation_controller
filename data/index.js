@@ -8,6 +8,31 @@ document.addEventListener("DOMContentLoaded", function() {
     let url = `ws://${hostname}:${port}/ws`;
     console.log(`hostname=${hostname}`);
     let ws = new WebSocket(url);
+
+    // DOM elements
+    // relay status indicator text and visual
+    const relayStatusTextOutput = document.getElementById("relayStatusText");
+    const relayStatusIndicatorOutput = document.getElementById("relayStatusIndicator");
+    // device name input
+    const deviceNameInput = document.getElementById("deviceNameInput");
+    // NTP enable input
+    const ntpEnableInput = document.getElementById("ntpEnableInput");
+    // GMT offset input div which is only visible if NTP is enabled.
+    const gmtOffsetInputDiv = document.getElementById("gmtOffsetInputDiv");
+    // manual time input div which will only be shown if NTP is disabled.
+    const manualTimeInputDiv = document.getElementById("manualTimeInputDiv");
+    const manualTimeInput = document.getElementById("manualTimeInput");
+    // status LED mode input
+    const ledModeInput = document.getElementById("ledModeInput");
+    // automatic timer enable input
+    const timerEnableInput = document.getElementById("timerEnableInput");
+    // manual relay state input div, which is only shown when automatic timer is disabled.
+    const manualRelayDiv = document.getElementById("manualRelayDiv");
+    // time slots relay input div, which is only shown when automatic timer is enabled.
+    const timeSlotsRelayDiv = document.getElementById("timeSlotsRelayDiv");
+    // save config button
+    const saveConfigBtn = document.getElementById("saveConfigBtn");
+
     /*
     TODO:
     .load all configuration from ESP32 on startup 
@@ -84,18 +109,15 @@ document.addEventListener("DOMContentLoaded", function() {
      */
     function updateDisplayedRelayState(payload) {
         console.log(JSON.stringify(payload));
-        const relayStatusTextElement = document.getElementById("relayStatusText");
-        const relayStatusIndicatorElement = document.getElementById("relayStatusIndicator");
-
         if (payload["relay_state"]) {
-            relayStatusTextElement.textContent = "On";
-            relayStatusIndicatorElement.classList.add("on");
-            relayStatusIndicatorElement.classList.remove("off");
+            relayStatusTextOutput.textContent = "On";
+            relayStatusIndicatorOutput.classList.add("on");
+            relayStatusIndicatorOutput.classList.remove("off");
         }
         else {
-            relayStatusTextElement.textContent = "Off";
-            relayStatusIndicatorElement.classList.add("off");
-            relayStatusIndicatorElement.classList.remove("on");
+            relayStatusTextOutput.textContent = "Off";
+            relayStatusIndicatorOutput.classList.add("off");
+            relayStatusIndicatorOutput.classList.remove("on");
         }
     }
 
@@ -103,7 +125,38 @@ document.addEventListener("DOMContentLoaded", function() {
      * Callback function to update displayed configuration
      */
     function updateDisplayedConfig(payload) {
+        // update name input value
+        deviceNameInput.value = payload["name"];
+        // update NTP enable value
+        ntpEnableInput.checked = payload["ntpEnabledSetting"];
+        // update GMT offset value 
+        gmtOffsetInput.value = payload["gmtOffsetSetting"];
+        updateNtpEnableDivDisplay();
+
         console.log(JSON.stringify(payload));
+        
+    }
+
+    ntpEnableInput.addEventListener("change", (event) => {
+        updateNtpEnableDivDisplay();
+    });
+
+    function updateNtpEnableDivDisplay() {
+        if (ntpEnableInput.checked) {
+            manualTimeInputDiv.style.display = "none";
+            gmtOffsetInputDiv.style.display = "block";
+        } else {
+            manualTimeInputDiv.style.display = "block";
+            gmtOffsetInputDiv.style.display = "none";
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = String(now.getMonth() + 1).padStart(2, '0'); // Months are 0-indexed, so +1
+            const day = String(now.getDate()).padStart(2, '0');
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            manualTimeInput.value = `${year}-${month}-${day}T${hours}:${minutes}`;
+            // 2024-09-25T01:08:34Z
+        }
     }
 
     // let element = document.querySelector('.timeSlot[data-index="1"]');

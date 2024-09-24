@@ -36,9 +36,13 @@
                     <span>Sync time automatically: </span>
                     <input id="ntpEnableInput" type="checkbox">
                 </div>
-                <div>
+                <div id="gmtOffsetInputDiv">
+                    <span>GMT offset: </span>
+                    <input type="number" id="gmtOffsetInput">
+                </div>
+                <div id="manualTimeInputDiv">
                     <span>Set date and time manually: </span>
-                    <input id="systemTimeInput" type="datetime-local">
+                    <input id="manualTimeInput" type="datetime-local">
                 </div>
                 <div>
                     <span>Status LED setting: </span>
@@ -59,7 +63,7 @@
             <span>Set relay state: </span>
             <input type="checkbox">
         </div>
-        <div id="timeSlotsDiv">
+        <div id="timeSlotsRelayDiv">
             <div class="timeSlot" data-index="0" style="border: 2px solid black;">
                 <div>
                     <span>Timeslot 0</span>
@@ -132,8 +136,8 @@
                 </div>
             </div>
         </div>
-        <div id="saveBtnDiv">
-            <button id="saveBtn">Save settings</button>
+        <div id="saveConfigBtnDiv">
+            <button id="saveConfigBtn">Save settings</button>
         </div>
     </body>
 </html>
