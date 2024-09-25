@@ -10,6 +10,7 @@
 
 #include "RTCNTPlib.h"
 #include "EEPROMConfig.h"
+#include "Relay.h"
 
 /*
 Other libraries and modules to include:
@@ -217,7 +218,7 @@ const String WIFIS_TYPE= "wifis";
 class WebserverModule {
     public:
         WebserverModule();
-        static void begin(EEPROMConfig* eC, RTCNTP* rtcntp);
+        static void begin(EEPROMConfig* eC, RTCNTP* rtcntp, Relay* relay);
         
         // wifi connection methods
         static void connect();
@@ -233,7 +234,6 @@ class WebserverModule {
         // methods to send ESP32 state to client browser
         static void sendConnection(JsonDocument payloadJSON=JsonDocument());
         static void sendCurrentRelayState(bool curRelayState);
-        static void sendSavedManualRelayState(JsonDocument inputPayloadJSON=JsonDocument());
         static void sendDateTime(JsonDocument inputPayloadJSON=JsonDocument());
         static void sendConfig(JsonDocument inputPayloadJSON=JsonDocument());
         // method to handle requests from the client browser 
@@ -265,6 +265,7 @@ class WebserverModule {
         static EEPROMConfig* _eC;
         static RTCNTP* _rtcntp;
         static IPAddress _apIP;
+        static Relay* _relay; 
 
         static void (*_sendConnectionFunc)();
         static void (*_sendRelayStateFunc)();

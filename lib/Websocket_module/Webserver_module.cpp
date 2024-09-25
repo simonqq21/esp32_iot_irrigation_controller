@@ -7,6 +7,8 @@ char WebserverModule::_strData[1250];
 EEPROMConfig* WebserverModule::_eC;
 RTCNTP* WebserverModule::_rtcntp;
 IPAddress  WebserverModule::_apIP;
+Relay* WebserverModule::_relay;
+
 void (*WebserverModule::_sendConnectionFunc)();
 void (*WebserverModule::_sendRelayStateFunc)();
 void (*WebserverModule::_sendDateTimeFunc)();
@@ -25,10 +27,11 @@ WebserverModule::WebserverModule() {
 
 }
 
-void WebserverModule::begin(EEPROMConfig* eC, RTCNTP* rtcntp) {
+void WebserverModule::begin(EEPROMConfig* eC, RTCNTP* rtcntp, Relay* relay) {
     _eC = eC;
     _rtcntp = rtcntp;
-
+    _relay = relay;
+    
     // start websockets and webserver
     _ws.onEvent(onEvent);
     _server.addHandler(&_ws);
@@ -250,17 +253,6 @@ void WebserverModule::sendCurrentRelayState(bool curRelayState) {
     _ws.textAll(_strData);
 }
 
-void WebserverModule::sendSavedManualRelayState(JsonDocument inputPayloadJSON) {
-    _jsonDoc.clear();
-    _jsonDoc[CMD_KEY] = LOAD_CMD;
-    _jsonDoc[TYPE_KEY] = RELAY_STATE_TYPE;
-    JsonObject payloadJSON = _jsonDoc[PAYLOAD_KEY].to<JsonObject>();
-    payloadJSON["relay_state"] = _eC->getRelayManualSetting();
-    serializeJson(_jsonDoc, _strData);
-    Serial.printf("serialized JSON = %s\n", _strData);
-    _ws.textAll(_strData);
-}
-
 void WebserverModule::sendDateTime(JsonDocument inputPayloadJSON) {
     _jsonDoc.clear();
     _jsonDoc[CMD_KEY] = LOAD_CMD;
@@ -311,7 +303,7 @@ void WebserverModule::handleRequest(String type, JsonDocument payloadJSON) {
         }
     }
     else if (type == RELAY_STATE_TYPE) {
-        sendSavedManualRelayState(payloadJSON);
+        sendCurrentRelayState(_relay->readState());
         if (_sendRelayStateFunc != NULL) {
             _sendRelayStateFunc();
         }

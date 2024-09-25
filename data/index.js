@@ -19,17 +19,22 @@ document.addEventListener("DOMContentLoaded", function() {
     const ntpEnableInput = document.getElementById("ntpEnableInput");
     // GMT offset input div which is only visible if NTP is enabled.
     const gmtOffsetInputDiv = document.getElementById("gmtOffsetInputDiv");
+        const gmtOffsetInput = document.getElementById("gmtOffsetInput");
     // manual time input div which will only be shown if NTP is disabled.
     const manualTimeInputDiv = document.getElementById("manualTimeInputDiv");
-    const manualTimeInput = document.getElementById("manualTimeInput");
+        const manualTimeInput = document.getElementById("manualTimeInput");
     // status LED mode input
     const ledModeInput = document.getElementById("ledModeInput");
     // automatic timer enable input
     const timerEnableInput = document.getElementById("timerEnableInput");
     // manual relay state input div, which is only shown when automatic timer is disabled.
     const manualRelayDiv = document.getElementById("manualRelayDiv");
+        // manual relay state input
+        const manualRelayInput = document.getElementById("manualRelayInput");
     // time slots relay input div, which is only shown when automatic timer is enabled.
-    const timeSlotsRelayDiv = document.getElementById("timeSlotsRelayDiv");
+    const timeSlotsRelayDiv = document.getElementById("timeSlotsRelayDiv"); 
+        // list of all timeslots
+        const timeSlots = timeSlotsRelayDiv.getElementsByClassName("timeSlot");
     // save config button
     const saveConfigBtn = document.getElementById("saveConfigBtn");
 
@@ -132,15 +137,23 @@ document.addEventListener("DOMContentLoaded", function() {
         // update GMT offset value 
         gmtOffsetInput.value = payload["gmtOffsetSetting"];
         updateNtpEnableDivDisplay();
+        ledModeInput.value = payload["ledSetting"];
+        timerEnableInput.checked = payload["timerEnabledSetting"];
+        manualRelayInput.checked = payload["relayManualSetting"];
 
-        console.log(JSON.stringify(payload));
         
+        console.log(`timeslots length = ${timeSlots.length}`);
     }
 
     ntpEnableInput.addEventListener("change", (event) => {
         updateNtpEnableDivDisplay();
     });
 
+    /**
+     * update the time setting div based on if NTP is enabled.
+     * If NTP is enabled, display the div with the input to set GMT offset. 
+     * Else, display the div to set the system date and time manually. 
+     */
     function updateNtpEnableDivDisplay() {
         if (ntpEnableInput.checked) {
             manualTimeInputDiv.style.display = "none";

@@ -46,10 +46,10 @@
                 </div>
                 <div>
                     <span>Status LED setting: </span>
-                    <select name="" id="ledModeInput">
-                        <option value="0">off</option>
-                        <option value="1">on</option>
-                        <option value="2">blinking</option>
+                    <select id="ledModeInput">
+                        <option value=0>off</option>
+                        <option value=1>on</option>
+                        <option value=2>blinking</option>
                     </select>
                 </div>
                 <div>
@@ -61,7 +61,7 @@
         </div>
         <div id="manualRelayDiv">
             <span>Set relay state: </span>
-            <input type="checkbox">
+            <input type="checkbox" id="manualRelayInput">
         </div>
         <div id="timeSlotsRelayDiv">
             <div class="timeSlot" data-index="0" style="border: 2px solid black;">

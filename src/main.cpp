@@ -171,7 +171,7 @@ void setup() {
   // init wsmod
   // scan wifi
   wsMod.scanWiFi();
-  wsMod.begin(&eC, &rtcntp);
+  wsMod.begin(&eC, &rtcntp, &relay);
   wsMod.setSendConnectionCallback();
   wsMod.setSendDateTimeCallback();
   wsMod.setSendRelayStateCallback();
