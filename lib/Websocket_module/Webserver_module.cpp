@@ -31,7 +31,7 @@ void WebserverModule::begin(EEPROMConfig* eC, RTCNTP* rtcntp, Relay* relay) {
     _eC = eC;
     _rtcntp = rtcntp;
     _relay = relay;
-    
+
     // start websockets and webserver
     _ws.onEvent(onEvent);
     _server.addHandler(&_ws);
@@ -149,6 +149,10 @@ void WebserverModule::sendWiFiScanResults() {
         Serial.printf("serialized JSON = %s\n", _strData);
         _ws.textAll(_strData);
     }
+}
+
+void WebserverModule::cleanupClients() {
+    _ws.cleanupClients();
 }
 
 /*

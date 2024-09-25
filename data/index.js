@@ -34,7 +34,7 @@ document.addEventListener("DOMContentLoaded", function() {
     // time slots relay input div, which is only shown when automatic timer is enabled.
     const timeSlotsRelayDiv = document.getElementById("timeSlotsRelayDiv"); 
         // list of all timeslots
-        const timeSlots = timeSlotsRelayDiv.getElementsByClassName("timeSlot");
+        const timeSlotsInputs = timeSlotsRelayDiv.getElementsByClassName("timeSlot");
     // save config button
     const saveConfigBtn = document.getElementById("saveConfigBtn");
 
@@ -63,20 +63,11 @@ document.addEventListener("DOMContentLoaded", function() {
                 onStartTime: new Date(2024, 1, 1, 0, 0, 0),
                 onEndTime: new Date(2024, 1, 1, 1, 0, 0),
             },
-            {   
-                index: 1,
-                enabled: false, 
-                onStartTime: new Date(2024, 1, 1, 0, 1, 0),
-                onEndTime: new Date(2024, 1, 1, 0, 2, 0),
-            },
-            {   
-                index: 2,
-                enabled: false, 
-                onStartTime: new Date(2024, 1, 1, 0, 2, 0),
-                onEndTime: new Date(2024, 1, 1, 0, 4, 0),
-            }
         ]
     };
+
+    updateNtpEnableDivDisplay();
+    updateTimerEnableDivDisplay();
 
     // request for the date and time, relay state, and configuration upon websocket open
     ws.addEventListener("open", (event) => {
@@ -139,10 +130,35 @@ document.addEventListener("DOMContentLoaded", function() {
         updateNtpEnableDivDisplay();
         ledModeInput.value = payload["ledSetting"];
         timerEnableInput.checked = payload["timerEnabledSetting"];
+        updateTimerEnableDivDisplay();
         manualRelayInput.checked = payload["relayManualSetting"];
 
-        
-        console.log(`timeslots length = ${timeSlots.length}`);
+        while (timeSlotsInputs.length > 1) {
+            timeSlotsRelayDiv.removeChild(timeSlotsInputs[0]);
+        }
+        let timeSlotTemplate = timeSlotsRelayDiv.getElementsByClassName("timeSlotTemplate")[0];
+        console.log(`timeSlotTemplate = ${timeSlotTemplate}`);
+        timeSlotTemplate.style.display = "none";
+        for (let i in payload["timeSlots"]) {
+            console.log(i);
+            let newTimeSlot = timeSlotTemplate.cloneNode(true);
+            newTimeSlot.classList.add("timeSlot");
+            newTimeSlot.classList.remove("timeSlotTemplate");
+            let timeSlotIndex = newTimeSlot.getElementsByClassName("index")[0];
+            let timeSlotEnabled = newTimeSlot.getElementsByClassName("enabled")[0]; 
+            let timeSlotStartTime = newTimeSlot.getElementsByClassName("startTime")[0];  
+            let timeSlotEndTime = newTimeSlot.getElementsByClassName("endTime")[0];  
+            let timeSlotDuration = newTimeSlot.getElementsByClassName("duration")[0];  
+            timeSlotIndex.textContent = payload["timeSlots"][i]["index"];
+            timeSlotEnabled.checked = payload["timeSlots"][i]["enabled"];
+            timeSlotStartTime.value = payload["timeSlots"][i]["onStartTime"].slice(0,8);
+            timeSlotEndTime.value = payload["timeSlots"][i]["onEndTime"].slice(0,8);
+            // let endDate
+            // timeSlotStartTime.value = payload["timeSlots"][i]["onStartTime"];
+            newTimeSlot.style.display = "block";
+            timeSlotsRelayDiv.appendChild(newTimeSlot);
+        }
+        // console.log(`timeslots length = ${payload["timeSlots"].length}`);
     }
 
     ntpEnableInput.addEventListener("change", (event) => {
@@ -169,6 +185,20 @@ document.addEventListener("DOMContentLoaded", function() {
             const minutes = String(now.getMinutes()).padStart(2, '0');
             manualTimeInput.value = `${year}-${month}-${day}T${hours}:${minutes}`;
             // 2024-09-25T01:08:34Z
+        }
+    }
+
+    timerEnableInput.addEventListener("change", (event) => {
+        updateTimerEnableDivDisplay();
+    });
+
+    function updateTimerEnableDivDisplay() {
+        if (timerEnableInput.checked) {
+            manualRelayDiv.style.display = "none";
+            timeSlotsRelayDiv.style.display = "block";
+        } else {
+            manualRelayDiv.style.display = "block";
+            timeSlotsRelayDiv.style.display = "none";
         }
     }
 

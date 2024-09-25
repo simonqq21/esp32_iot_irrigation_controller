@@ -224,6 +224,7 @@ class WebserverModule {
         static void connect();
         static void scanWiFi();
         static void sendWiFiScanResults();
+        static void cleanupClients();
         static void checkWiFiStatusLoop();
 
         // websocket methods

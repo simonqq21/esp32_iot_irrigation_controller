@@ -64,74 +64,27 @@
             <input type="checkbox" id="manualRelayInput">
         </div>
         <div id="timeSlotsRelayDiv">
-            <div class="timeSlot" data-index="0" style="border: 2px solid black;">
+            <div class="timeSlotTemplate" data-index="0" style="border: 2px solid black;">
                 <div>
-                    <span>Timeslot 0</span>
+                    <span>Timeslot </span>
+                    <span class="index">0</span>
                 </div>
                 <span>
                     <span>Enabled:</span>
-                    <input type="checkbox">
+                    <input type="checkbox" class="enabled">
                 </span>
                 <div>
                     <span>
                         <span>Start time: </span>
-                        <input type="time">
+                        <input type="time" class="startTime" step="1">
                     </span>
                     <span>
                         <span>End time: </span>
-                        <input type="time">
+                        <input type="time" class="endTime" step="1">
                     </span>
                     <span>
                         <span>Duration: </span>
-                        <input type="number"> s
-                    </span>
-                </div>
-            </div>
-
-            <div class="timeSlot" data-index="1" style="border: 2px solid black;">
-                <div>
-                    <span>Timeslot 1</span>
-                </div>
-                <span>
-                    <span>Enabled:</span>
-                    <input class="tsEnabledInput" type="checkbox">
-                </span>
-                <div>
-                    <span>
-                        <span>Start time: </span>
-                        <input type="time">
-                    </span>
-                    <span>
-                        <span>End time: </span>
-                        <input type="time">
-                    </span>
-                    <span>
-                        <span>Duration: </span>
-                        <input type="number"> s
-                    </span>
-                </div>
-            </div>
-
-            <div class="timeSlot" data-index="2" style="border: 2px solid black;">
-                <div>
-                    <span>Timeslot 2</span>
-                </div>
-                <span>
-                    <span>Enabled:</span>
-                    <input type="checkbox">
-                </span>
-                <div>
-                    <span>
-                        <span>Start time: </span>
-                        <input type="time">
-                    </span>
-                    <span>
-                        <span>End time: </span>
-                        <input type="time">
-                    </span>
-                    <span>
-                        <span>Duration: </span>
-                        <input type="number"> s
+                        <input type="number" class="duration">
                     </span>
                 </div>
             </div>

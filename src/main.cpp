@@ -199,6 +199,7 @@ void loop() {
   // start concurrent loops
   statusLED.loop();
   button.loop();
+  wsMod.cleanupClients();
   wsMod.checkWiFiStatusLoop();
 
   checkRelayIfOn();
