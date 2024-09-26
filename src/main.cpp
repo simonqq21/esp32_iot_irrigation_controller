@@ -6,23 +6,6 @@
 #include "EEPROMConfig.h"
 #include "Webserver_module.h"
 
-/*
-feature list:
-Done:
-. initialize all settings for wifi and rtcntp from the eeprom config
-. when timer is enabled, check all timeslots and switch the relay accordingly.
-. when button is short pressed, toggle relay state manually if timer is disabled.
-. when button is long pressed, reset wifi credentials and restart ESP32.
-. when button is double pressed, toggle timer enabled.
-. when config is set via websockets, check all timeslots again.
-. when relay is set via websockets, switch relay state.
-. when status LED mode is set via websockets, switch LED mode.
-. when gmt offset is set via websockets, update rtcntp websocket.
-
-Pending:
-. 
-*/
-
 const int ledPin = 18;
 const int buttonPin = 4;
 const int relayPin = 13;
@@ -40,17 +23,15 @@ int timeSlotCheckInterval = 1000;
 bool resetWiFi = false;
 bool resetWiFiBlinkLED = false;
 unsigned long resetWiFiTime;
-
 unsigned long sendTimeInterval = 1000;
-
 unsigned long lastTimeTimeSent;
+bool newRelayState;
 
 /*
 function run in loop to switch on the relay when any timeslot is on and if 
 timer is enabled.
 */
 void checkRelayIfOn() {
-  bool newRelayState;
   if (eC.getTimerEnabled()) {
     if (millis() - lastTimeTimeSlotsChecked >= timeSlotCheckInterval) {
       lastTimeTimeSlotsChecked = millis();
@@ -62,7 +43,9 @@ void checkRelayIfOn() {
     newRelayState = eC.getRelayManualSetting();
   }
   if (newRelayState != relay.readState()) {
+    // Serial.printf("before set %d, %d",newRelayState, relay.readState());
     relay.set(newRelayState);
+    // Serial.printf("after set %d, %d",newRelayState, relay.readState());
     wsMod.sendCurrentRelayState(newRelayState);
   }
 }
