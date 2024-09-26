@@ -1,6 +1,6 @@
 #include "Webserver_module.h"
 
-AsyncWebServer WebserverModule::_server = AsyncWebServer(5555);
+AsyncWebServer* WebserverModule::_server;
 AsyncWebSocket WebserverModule::_ws = AsyncWebSocket("/ws");
 JsonDocument WebserverModule::_jsonDoc;
 char WebserverModule::_strData[1250];
@@ -18,11 +18,6 @@ void (*WebserverModule::_receiveRelayStateFunc)();
 void (*WebserverModule::_receiveDateTimeFunc)();
 void (*WebserverModule::_receiveConfigFunc)();
 
-// AsyncWebServer _server = AsyncWebServer(5555);
-// AsyncWebSocket _ws = AsyncWebSocket("/ws");
-// WebserverModule::WebserverModule(): _server(5555), _ws("/ws") {
-// }
-
 WebserverModule::WebserverModule() {
 
 }
@@ -34,12 +29,13 @@ void WebserverModule::begin(EEPROMConfig* eC, RTCNTP* rtcntp, Relay* relay) {
 
     // start websockets and webserver
     _ws.onEvent(onEvent);
-    _server.addHandler(&_ws);
-    _server.begin();
+    _server = new AsyncWebServer(_eC->getPort());
+    _server->addHandler(&_ws);
+    _server->begin();
     Serial.println("initialized ws");
 
     // start serving webpages
-    AsyncWebHandler testHandler = _server.on("/test", HTTP_GET, [](AsyncWebServerRequest* request) {
+    AsyncWebHandler testHandler = _server->on("/test", HTTP_GET, [](AsyncWebServerRequest* request) {
         // request->send(200, "hhelloworld");
         request->send(200, "text/plain", "Hhhelloworld");
     });

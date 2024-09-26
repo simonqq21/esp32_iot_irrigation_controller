@@ -259,7 +259,7 @@ class WebserverModule {
         static void setReceiveConfigCallback(void (*callback)() = NULL);
 
     private:
-        static AsyncWebServer _server;
+        static AsyncWebServer* _server;
         static AsyncWebSocket _ws;
         static JsonDocument _jsonDoc;
         static char _strData[1250];

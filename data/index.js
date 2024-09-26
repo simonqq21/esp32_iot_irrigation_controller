@@ -1,7 +1,7 @@
 import * as wsMod from './wsMod.js';
 
 document.addEventListener("DOMContentLoaded", function() {
-    let port = 5555;
+    let port = 7777;
     // let hostname = window.location.hostname;
     let hostname = "192.168.5.70";
     // let hostname = "192.168.4.1";
@@ -33,6 +33,10 @@ document.addEventListener("DOMContentLoaded", function() {
         const manualRelayInput = document.getElementById("manualRelayInput");
     // time slots relay input div, which is only shown when automatic timer is enabled.
     const timeSlotsRelayDiv = document.getElementById("timeSlotsRelayDiv"); 
+        // invisible timeSlot html template
+        let timeSlotTemplate = document.getElementsByClassName("timeSlotTemplate")[0];
+        console.log(`timeSlotTemplate = ${timeSlotTemplate}`);
+        timeSlotTemplate.style.display = "none";
         // list of all timeslots
         const timeSlotsInputs = timeSlotsRelayDiv.getElementsByClassName("timeSlot");
     // save config button
@@ -66,6 +70,7 @@ document.addEventListener("DOMContentLoaded", function() {
         ]
     };
 
+    // update the visible divs based on certain settings
     updateNtpEnableDivDisplay();
     updateTimerEnableDivDisplay();
 
@@ -101,7 +106,7 @@ document.addEventListener("DOMContentLoaded", function() {
     }
 
     /**
-     * Callback function to update displayed relay state
+     * Callback function to update current relay state display
      */
     function updateDisplayedRelayState(payload) {
         console.log(JSON.stringify(payload));
@@ -127,35 +132,41 @@ document.addEventListener("DOMContentLoaded", function() {
         ntpEnableInput.checked = payload["ntpEnabledSetting"];
         // update GMT offset value 
         gmtOffsetInput.value = payload["gmtOffsetSetting"];
+        // set visible div based on NTP enabled value
         updateNtpEnableDivDisplay();
+        // update status LED value
         ledModeInput.value = payload["ledSetting"];
+        // update timer enabled value
         timerEnableInput.checked = payload["timerEnabledSetting"];
+        // set visible div based on timer enabled value
         updateTimerEnableDivDisplay();
         manualRelayInput.checked = payload["relayManualSetting"];
-
+        // remove all timeslots
         while (timeSlotsInputs.length > 1) {
             timeSlotsRelayDiv.removeChild(timeSlotsInputs[0]);
         }
-        let timeSlotTemplate = timeSlotsRelayDiv.getElementsByClassName("timeSlotTemplate")[0];
-        console.log(`timeSlotTemplate = ${timeSlotTemplate}`);
-        timeSlotTemplate.style.display = "none";
-
+        // refresh all timeslots
         for (let i in payload["timeSlots"]) {
-            console.log(i);
+            // clone timeslot template, make it visible, and change the classname
             let newTimeSlot = timeSlotTemplate.cloneNode(true);
             newTimeSlot.classList.add("timeSlot");
             newTimeSlot.classList.remove("timeSlotTemplate");
+            // get the fields of the new timeslot element
             let timeSlotIndex = newTimeSlot.getElementsByClassName("index")[0];
             let timeSlotEnabled = newTimeSlot.getElementsByClassName("enabled")[0]; 
             let timeSlotStartTime = newTimeSlot.getElementsByClassName("startTime")[0];  
             let timeSlotEndTime = newTimeSlot.getElementsByClassName("endTime")[0];  
             let timeSlotDuration = newTimeSlot.getElementsByClassName("duration")[0];  
+            // set the values from the payload into the fields of the new timeslot element
             timeSlotIndex.textContent = payload["timeSlots"][i]["index"];
             timeSlotEnabled.checked = payload["timeSlots"][i]["enabled"];
+            // get time ISO strings of start and end times
             let startTimeString = payload["timeSlots"][i]["onStartTime"].slice(0,8);
             let endTimeString = payload["timeSlots"][i]["onEndTime"].slice(0,8);
+            // set values for onStartTime and onEndTime
             timeSlotStartTime.value = startTimeString;
             timeSlotEndTime.value = endTimeString;
+            // compute for the duration in seconds
             let startTimeInDate = new Date();
             startTimeInDate.setUTCHours(startTimeString.slice(0,2));
             startTimeInDate.setUTCMinutes(startTimeString.slice(3,5));
@@ -172,14 +183,15 @@ document.addEventListener("DOMContentLoaded", function() {
                 endTimeInDate.setUTCDate(endTimeInDate.getUTCDate() + 1);
             }
             duration = (endTimeInDate-startTimeInDate)/1000;
+            // set duration value in timeslots
             timeSlotDuration.value = duration;            
-
+            // display new timeslot and append it to the timeslots div
             newTimeSlot.style.display = "block";
             timeSlotsRelayDiv.appendChild(newTimeSlot);
         }
-        // console.log(`timeslots length = ${payload["timeSlots"].length}`);
     }
 
+    // set visible div when ntpEnableInput is changed
     ntpEnableInput.addEventListener("change", (event) => {
         updateNtpEnableDivDisplay();
     });
@@ -207,10 +219,16 @@ document.addEventListener("DOMContentLoaded", function() {
         }
     }
 
+    // set visible div when timerEnableInput is changed
     timerEnableInput.addEventListener("change", (event) => {
         updateTimerEnableDivDisplay();
     });
 
+    /**
+     * Callback function to set the visible div depending on timerEnableInput value.
+     * If timerEnableInput is enabled, display the div of timeslots.
+     * Else if disabled, display the manual relay div.
+     */
     function updateTimerEnableDivDisplay() {
         if (timerEnableInput.checked) {
             manualRelayDiv.style.display = "none";
