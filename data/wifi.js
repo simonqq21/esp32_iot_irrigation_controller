@@ -4,7 +4,7 @@ document.addEventListener("DOMContentLoaded", function() {
     // set page to the WiFi hotspot list upon load.
     setPage("listwifi");
 
-    let portValTemp = 5555;
+    let portValTemp = 7777;
     // let hostname = window.location.hostname;
     let hostname = "192.168.5.70";
     // let hostname = "192.168.4.1";

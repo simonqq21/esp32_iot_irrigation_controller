@@ -35,12 +35,48 @@ document.addEventListener("DOMContentLoaded", function() {
     const timeSlotsRelayDiv = document.getElementById("timeSlotsRelayDiv"); 
         // invisible timeSlot html template
         let timeSlotTemplate = document.getElementsByClassName("timeSlotTemplate")[0];
-        console.log(`timeSlotTemplate = ${timeSlotTemplate}`);
         timeSlotTemplate.style.display = "none";
         // list of all timeslots
         const timeSlotsInputs = timeSlotsRelayDiv.getElementsByClassName("timeSlot");
+        const timeSlotsEnableds = document.getElementsByClassName("timeSlotEnabled");
+        const timeSlotsStartTimes = document.getElementsByClassName("timeSlotStartTime"); 
+        const timeSlotsEndTimes = document.getElementsByClassName("timeSlotEndTime");
+        const timeSlotsDurations = document.getElementsByClassName("timeSlotDuration");
     // save config button
     const saveConfigBtn = document.getElementById("saveConfigBtn");
+
+    deviceNameInput.addEventListener("change", () => {
+
+    });
+
+    // change eventListener for ntpEnableInput
+    ntpEnableInput.addEventListener("change", () => {
+        // set visible div when ntpEnableInput is changed
+        updateNtpEnableDivDisplay();
+    });
+
+    gmtOffsetInput.addEventListener("change", () => {
+
+    });
+
+    manualTimeInput.addEventListener("change", () => {
+
+    });
+
+    ledModeInput.addEventListener("change", () => {
+
+    });
+
+    timerEnableInput.addEventListener("change", () => {
+        // set visible div when timerEnableInput is changed
+        updateTimerEnableDivDisplay();
+    });
+
+    manualRelayInput.addEventListener("change", () => {
+
+    });
+
+
 
     /*
     TODO:
@@ -152,11 +188,11 @@ document.addEventListener("DOMContentLoaded", function() {
             newTimeSlot.classList.add("timeSlot");
             newTimeSlot.classList.remove("timeSlotTemplate");
             // get the fields of the new timeslot element
-            let timeSlotIndex = newTimeSlot.getElementsByClassName("index")[0];
-            let timeSlotEnabled = newTimeSlot.getElementsByClassName("enabled")[0]; 
-            let timeSlotStartTime = newTimeSlot.getElementsByClassName("startTime")[0];  
-            let timeSlotEndTime = newTimeSlot.getElementsByClassName("endTime")[0];  
-            let timeSlotDuration = newTimeSlot.getElementsByClassName("duration")[0];  
+            let timeSlotIndex = newTimeSlot.getElementsByClassName("timeSlotIndex")[0];
+            let timeSlotEnabled = newTimeSlot.getElementsByClassName("timeSlotEnabled")[0]; 
+            let timeSlotStartTime = newTimeSlot.getElementsByClassName("timeSlotStartTime")[0];  
+            let timeSlotEndTime = newTimeSlot.getElementsByClassName("timeSlotEndTime")[0];  
+            let timeSlotDuration = newTimeSlot.getElementsByClassName("timeSlotDuration")[0];  
             // set the values from the payload into the fields of the new timeslot element
             timeSlotIndex.textContent = payload["timeSlots"][i]["index"];
             timeSlotEnabled.checked = payload["timeSlots"][i]["enabled"];
@@ -191,11 +227,6 @@ document.addEventListener("DOMContentLoaded", function() {
         }
     }
 
-    // set visible div when ntpEnableInput is changed
-    ntpEnableInput.addEventListener("change", (event) => {
-        updateNtpEnableDivDisplay();
-    });
-
     /**
      * update the time setting div based on if NTP is enabled.
      * If NTP is enabled, display the div with the input to set GMT offset. 
@@ -218,11 +249,6 @@ document.addEventListener("DOMContentLoaded", function() {
             // 2024-09-25T01:08:34Z
         }
     }
-
-    // set visible div when timerEnableInput is changed
-    timerEnableInput.addEventListener("change", (event) => {
-        updateTimerEnableDivDisplay();
-    });
 
     /**
      * Callback function to set the visible div depending on timerEnableInput value.
