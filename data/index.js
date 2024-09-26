@@ -139,6 +139,7 @@ document.addEventListener("DOMContentLoaded", function() {
         let timeSlotTemplate = timeSlotsRelayDiv.getElementsByClassName("timeSlotTemplate")[0];
         console.log(`timeSlotTemplate = ${timeSlotTemplate}`);
         timeSlotTemplate.style.display = "none";
+
         for (let i in payload["timeSlots"]) {
             console.log(i);
             let newTimeSlot = timeSlotTemplate.cloneNode(true);
@@ -151,10 +152,28 @@ document.addEventListener("DOMContentLoaded", function() {
             let timeSlotDuration = newTimeSlot.getElementsByClassName("duration")[0];  
             timeSlotIndex.textContent = payload["timeSlots"][i]["index"];
             timeSlotEnabled.checked = payload["timeSlots"][i]["enabled"];
-            timeSlotStartTime.value = payload["timeSlots"][i]["onStartTime"].slice(0,8);
-            timeSlotEndTime.value = payload["timeSlots"][i]["onEndTime"].slice(0,8);
-            // let endDate
-            // timeSlotStartTime.value = payload["timeSlots"][i]["onStartTime"];
+            let startTimeString = payload["timeSlots"][i]["onStartTime"].slice(0,8);
+            let endTimeString = payload["timeSlots"][i]["onEndTime"].slice(0,8);
+            timeSlotStartTime.value = startTimeString;
+            timeSlotEndTime.value = endTimeString;
+            let startTimeInDate = new Date();
+            startTimeInDate.setUTCHours(startTimeString.slice(0,2));
+            startTimeInDate.setUTCMinutes(startTimeString.slice(3,5));
+            startTimeInDate.setUTCSeconds(startTimeString.slice(6,8));
+            let endTimeInDate = new Date();
+            endTimeInDate.setUTCHours(endTimeString.slice(0,2));
+            endTimeInDate.setUTCMinutes(endTimeString.slice(3,5));
+            endTimeInDate.setUTCSeconds(endTimeString.slice(6,8));
+            let duration = (endTimeInDate-startTimeInDate)/1000;
+            console.log(startTimeInDate.toISOString());
+            console.log(endTimeInDate.toISOString());
+            console.log(duration);
+            if (duration < 0) {
+                endTimeInDate.setUTCDate(endTimeInDate.getUTCDate() + 1);
+            }
+            duration = (endTimeInDate-startTimeInDate)/1000;
+            timeSlotDuration.value = duration;            
+
             newTimeSlot.style.display = "block";
             timeSlotsRelayDiv.appendChild(newTimeSlot);
         }

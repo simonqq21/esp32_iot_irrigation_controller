@@ -29,14 +29,26 @@ async def main():
     payload["ledSetting"] = 2
     payload["ntpEnabledSetting"] = True
     payload["timerEnabledSetting"] = True
-    payload["timeSlots"][3]["index"] = 3
-    payload["timeSlots"][3]["enabled"] = True 
-    payload["timeSlots"][3]["onStartTime"] = time(12,0,0).isoformat()
-    payload["timeSlots"][3]["onEndTime"] = time(13,0,0).isoformat()
+
+    payload["timeSlots"][0]["index"] = 0
+    payload["timeSlots"][0]["enabled"] = True
+    payload["timeSlots"][0]["onStartTime"] = time(14,0,0).isoformat()
+    payload["timeSlots"][0]["onEndTime"] = time(11,0,0).isoformat()
+
+    payload["timeSlots"][1]["index"] = 1
+    payload["timeSlots"][1]["enabled"] = False 
+    payload["timeSlots"][1]["onStartTime"] = time(15,0,0).isoformat()
+    payload["timeSlots"][1]["onEndTime"] = time(18,0,0).isoformat()
+
     payload["timeSlots"][2]["index"] = 2
     payload["timeSlots"][2]["enabled"] = True 
     payload["timeSlots"][2]["onStartTime"] = time(6,30,0).isoformat()
     payload["timeSlots"][2]["onEndTime"] = time(8,0,0).isoformat()
+
+    payload["timeSlots"][3]["index"] = 3
+    payload["timeSlots"][3]["enabled"] = True 
+    payload["timeSlots"][3]["onStartTime"] = time(12,0,0).isoformat()
+    payload["timeSlots"][3]["onEndTime"] = time(13,0,0).isoformat()
     print(jsonMessage)
     await client.saveConfig(jsonMessage)
     await client.saveDateTime(datetime(2024,1,2,7,0,0))
