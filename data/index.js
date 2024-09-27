@@ -54,15 +54,15 @@ document.addEventListener("DOMContentLoaded", function() {
     ntpEnableInput.addEventListener("change", () => {
         // set visible div when ntpEnableInput is changed
         updateNtpEnableDivDisplay();
-        config.ntpEnableInput = ntpEnableInput.value;
+        config.ntpEnabledSetting = ntpEnableInput.checked;
     });
 
     gmtOffsetInput.addEventListener("change", () => {
-        config.gmtOffsetInput = gmtOffsetInput.value;
+        config.gmtOffsetSetting = gmtOffsetInput.value;
     });
 
     manualTimeInput.addEventListener("change", () => {
-        manualDateTimeVal = manualTimeInput.value;
+        manualDateTimeVal.datetime = manualTimeInput.value;
         // alert(manualDateTimeVal);
     });
 
@@ -73,16 +73,24 @@ document.addEventListener("DOMContentLoaded", function() {
     timerEnableInput.addEventListener("change", () => {
         // set visible div when timerEnableInput is changed
         updateTimerEnableDivDisplay();
-        config.timerEnabledSetting = timerEnableInput.value;
+        config.timerEnabledSetting = timerEnableInput.checked;
     });
 
     manualRelayInput.addEventListener("change", () => {
-        config.relayManualSetting = manualRelayInput.value;
+        config.relayManualSetting = manualRelayInput.checked;
     });
 
-    // send config to ESP32
+    /**
+     * 
+     */
     saveConfigBtn.addEventListener("click", () => {
-
+        //save config first before save datetime
+        wsMod.saveConfig(ws, config);
+        console.log("save config");
+        if (!config.ntpEnabledSetting) {
+            console.log(`save datetime ${JSON.stringify(manualDateTimeVal)}`);
+            wsMod.saveDateTime(ws, manualDateTimeVal);
+        }
     });
 
     /**
@@ -168,7 +176,9 @@ document.addEventListener("DOMContentLoaded", function() {
     
     // variables for configuration and data
     let curDateTimeVal = new Date(Date.UTC(2024, 0, 1, 0, 0, 0)).toISOString();
-    let manualDateTimeVal = new Date(Date.UTC(2024,1,1,0,0,0)).toISOString();
+    let manualDateTimeVal = {
+        datetime: new Date(Date.UTC(2024,1,1,0,0,0)).toISOString(),
+    };
     // console.log(`manualDateTimeVal = ${manualDateTimeVal}`);
     let curRelayStateVal = false;
     let config = {

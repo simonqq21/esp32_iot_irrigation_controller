@@ -135,7 +135,7 @@ export function saveDateTime(ws, payload) {
  * @param {Number} payload.gmtOffsetSetting - GMT offset in hours
  * @param {Boolean} payload.timerEnabledSetting - automatic relay timer enabled setting
  * @param {Number} payload.ledSetting - integer status LED setting
- * @param {Object[]} payload.timeSlots - array of timeslot objects
+ * @param {Object[]} payload.timeSlots[] - array of timeslot objects
  * @param {Number} payload.timeSlots[].index - index of each timeslot
  * @param {Boolean} payload.timeSlots[].enabled - enabled setting of each timeslot
  * @param {String} payload.timeSlots[].onStartTime - start time of each timeslot in ISO format

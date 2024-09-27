@@ -374,6 +374,7 @@ void WebserverModule::receiveConfig(JsonDocument inputPayloadJSON) {
     _eC->setNTPEnabled(inputPayloadJSON["ntpEnabledSetting"]);
     _eC->setGMTOffset(inputPayloadJSON["gmtOffsetSetting"]);
     _eC->setTimerEnabled(inputPayloadJSON["timerEnabledSetting"]);
+    _eC->setRelayManualSetting(inputPayloadJSON["relayManualSetting"]);
     _eC->setLEDSetting(inputPayloadJSON["ledSetting"]);
     for (int i=0;i<NUMBER_OF_TIMESLOTS;i++) {
         _eC->getTimeSlot(i)->setIndex(inputPayloadJSON["timeSlots"][i]["index"]);

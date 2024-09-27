@@ -41,6 +41,7 @@ void checkRelayIfOn() {
   }
   else {
     newRelayState = eC.getRelayManualSetting();
+    // Serial.printf("newRelayState=%d\n", newRelayState);
   }
   if (newRelayState != relay.readState()) {
     // Serial.printf("before set %d, %d",newRelayState, relay.readState());

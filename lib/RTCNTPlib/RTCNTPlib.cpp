@@ -67,6 +67,8 @@ DateTime RTCNTP::getNTPTime() {
 void RTCNTP::setRTCTime(DateTime newDT) {
     _rtc.adjust(newDT);
     this->getRTCTime();
+    // Serial.print("rtc adjusted to ");
+    // Serial.println(this->getISODateTime());
 }
 
 // refresh NTP time from the internet
