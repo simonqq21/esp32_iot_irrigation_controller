@@ -146,21 +146,23 @@ document.addEventListener("DOMContentLoaded", function() {
                 else {
                     config.timeSlots[tsIndex].duration = 24*60*60-1;
                 }
+                element.value = config.timeSlots[tsIndex].duration;
 
                 let startTimeString = config.timeSlots[tsIndex].onStartTime;
-                let endTimeString = config.timeSlots[tsIndex].onEndTime;
                 let startTimeInDate = new Date();
                 startTimeInDate.setUTCHours(startTimeString.slice(0,2));
                 startTimeInDate.setUTCMinutes(startTimeString.slice(3,5));
                 startTimeInDate.setUTCSeconds(startTimeString.slice(6,8));
                 let endTimeInDate = new Date(startTimeInDate);
-                // console.log(`endTimeInDate = ${startTimeInDate.toISOString()}`);
                 endTimeInDate.setUTCSeconds(endTimeInDate.getUTCSeconds() + config.timeSlots[tsIndex].duration);
                 console.log(`start = ${startTimeInDate.toISOString()}`);
+                console.log(`end = ${endTimeInDate.toISOString().slice(11,19)}`);
 
-                console.log(`end = ${endTimeInDate.toISOString()}`);
-
-                element.value = config.timeSlots[tsIndex].duration;
+                let endTimeString = endTimeInDate.toISOString().slice(11,19);
+                config.timeSlots[tsIndex].onEndTime = endTimeString + 'Z';
+                element.parentElement.parentElement.getElementsByClassName("timeSlotEndTime")[0].value = endTimeString;
+                
+                // 2024-09-27T04:01:00.981Z
                 console.log(config.timeSlots[tsIndex].duration);
             });
         });
