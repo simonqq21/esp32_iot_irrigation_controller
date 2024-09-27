@@ -80,6 +80,11 @@ document.addEventListener("DOMContentLoaded", function() {
         config.relayManualSetting = manualRelayInput.value;
     });
 
+    // send config to ESP32
+    saveConfigBtn.addEventListener("click", () => {
+
+    });
+
     /**
      * Setsthe callbacks for the input elements inside each timeslot.
      */
@@ -93,10 +98,72 @@ document.addEventListener("DOMContentLoaded", function() {
             element.addEventListener("change", () => {
                 let tsIndex = element.dataset.tsIndex;
                 config.timeSlots[tsIndex].enabled = element.checked;
-                console.log(JSON.stringify(config)); 
+                // console.log(JSON.stringify(config)); 
             });
         });
-        
+        /*
+        if startTime is updated, calculate for duration.
+        if endTime is updated, calculate for duration.
+        if duration is updated, calculate for endTime.
+        */
+        timeSlotsStartTimes.forEach(element => {
+            element.addEventListener("change", () => {
+                let tsIndex = element.dataset.tsIndex;
+                config.timeSlots[tsIndex].onStartTime = element.value + "Z";
+                config.timeSlots[tsIndex].duration = calculateDuration(
+                    config.timeSlots[tsIndex].onStartTime,
+                    config.timeSlots[tsIndex].onEndTime
+                );
+                console.log(config.timeSlots[tsIndex].duration);
+                element.parentElement.parentElement.getElementsByClassName("timeSlotDuration")[0]
+                    .value = config.timeSlots[tsIndex].duration;
+                // console.log(JSON.stringify(config)); 
+            });
+        });
+        timeSlotsEndTimes.forEach(element => {
+            element.addEventListener("change", () => {
+                let tsIndex = element.dataset.tsIndex;
+                config.timeSlots[tsIndex].onEndTime = element.value + "Z";
+                config.timeSlots[tsIndex].duration = calculateDuration(
+                    config.timeSlots[tsIndex].onStartTime,
+                    config.timeSlots[tsIndex].onEndTime
+                );
+                console.log(config.timeSlots[tsIndex].duration);
+                element.parentElement.parentElement.getElementsByClassName("timeSlotDuration")[0]
+                    .value = config.timeSlots[tsIndex].duration;
+                // console.log(JSON.stringify(config)); 
+            });
+        });
+        timeSlotsDurations.forEach(element => {
+            element.addEventListener("change", () => {
+                let tsIndex = element.dataset.tsIndex;
+                if (element.value >=0 && element.value < 24*60*60-1) {
+                    config.timeSlots[tsIndex].duration = element.value;
+                }
+                else if (element.value < 0) {
+                    config.timeSlots[tsIndex].duration = 0;
+                }
+                else {
+                    config.timeSlots[tsIndex].duration = 24*60*60-1;
+                }
+
+                let startTimeString = config.timeSlots[tsIndex].onStartTime;
+                let endTimeString = config.timeSlots[tsIndex].onEndTime;
+                let startTimeInDate = new Date();
+                startTimeInDate.setUTCHours(startTimeString.slice(0,2));
+                startTimeInDate.setUTCMinutes(startTimeString.slice(3,5));
+                startTimeInDate.setUTCSeconds(startTimeString.slice(6,8));
+                let endTimeInDate = new Date(startTimeInDate);
+                // console.log(`endTimeInDate = ${startTimeInDate.toISOString()}`);
+                endTimeInDate.setUTCSeconds(endTimeInDate.getUTCSeconds() + config.timeSlots[tsIndex].duration);
+                console.log(`start = ${startTimeInDate.toISOString()}`);
+
+                console.log(`end = ${endTimeInDate.toISOString()}`);
+
+                element.value = config.timeSlots[tsIndex].duration;
+                console.log(config.timeSlots[tsIndex].duration);
+            });
+        });
     }
 
     /*
@@ -233,25 +300,8 @@ document.addEventListener("DOMContentLoaded", function() {
             // set values for onStartTime and onEndTime
             timeSlotStartTime.value = startTimeString;
             timeSlotEndTime.value = endTimeString;
-            // calculate the duration in seconds
-            let startTimeInDate = new Date();
-            startTimeInDate.setUTCHours(startTimeString.slice(0,2));
-            startTimeInDate.setUTCMinutes(startTimeString.slice(3,5));
-            startTimeInDate.setUTCSeconds(startTimeString.slice(6,8));
-            let endTimeInDate = new Date();
-            endTimeInDate.setUTCHours(endTimeString.slice(0,2));
-            endTimeInDate.setUTCMinutes(endTimeString.slice(3,5));
-            endTimeInDate.setUTCSeconds(endTimeString.slice(6,8));
-            let duration = (endTimeInDate-startTimeInDate)/1000;
-            console.log(startTimeInDate.toISOString());
-            console.log(endTimeInDate.toISOString());
-            console.log(duration);
-            if (duration < 0) {
-                endTimeInDate.setUTCDate(endTimeInDate.getUTCDate() + 1);
-            }
-            duration = (endTimeInDate-startTimeInDate)/1000;
             // set duration value in timeslots
-            timeSlotDuration.value = duration;            
+            timeSlotDuration.value = calculateDuration(startTimeString, endTimeString);            
             // display new timeslot and append it to the timeslots div
             newTimeSlot.style.display = "block";
             timeSlotsRelayDiv.appendChild(newTimeSlot);
@@ -259,6 +309,35 @@ document.addEventListener("DOMContentLoaded", function() {
         
         setTimeSlotsCallbacks();
     }
+
+    /**
+             * Computes for the duration of a timeslot in seconds given the start and end times 
+             * of the day in ISO time format.
+             * @param {String} startTimeString 
+             * @param {String} endTimeString 
+             * @returns {Number} duration
+             */
+    function calculateDuration(startTimeString, endTimeString) {
+        // calculate the duration in seconds
+        let startTimeInDate = new Date();
+        startTimeInDate.setUTCHours(startTimeString.slice(0,2));
+        startTimeInDate.setUTCMinutes(startTimeString.slice(3,5));
+        startTimeInDate.setUTCSeconds(startTimeString.slice(6,8));
+        let endTimeInDate = new Date();
+        endTimeInDate.setUTCHours(endTimeString.slice(0,2));
+        endTimeInDate.setUTCMinutes(endTimeString.slice(3,5));
+        endTimeInDate.setUTCSeconds(endTimeString.slice(6,8));
+        let duration = (endTimeInDate-startTimeInDate)/1000;
+        // console.log(startTimeInDate.toISOString());
+        // console.log(endTimeInDate.toISOString());
+        // console.log(duration);
+        if (duration < 0) {
+            endTimeInDate.setUTCDate(endTimeInDate.getUTCDate() + 1);
+        }
+        duration = (endTimeInDate-startTimeInDate)/1000;
+        return duration;
+    }
+    
 
     /**
      * update the time setting div based on if NTP is enabled.
