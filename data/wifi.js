@@ -4,13 +4,13 @@ document.addEventListener("DOMContentLoaded", function() {
     // set page to the WiFi hotspot list upon load.
     setPage("listwifi");
 
-    let portValTemp = 7777;
-    // let hostname = window.location.hostname;
-    let hostname = "192.168.5.70";
+    let port = window.location.port;
+    // let port = 7777;
+    let hostname = window.location.hostname;
+    // let hostname = "192.168.5.70";
     // let hostname = "192.168.4.1";
-    // let hostname = "192.168.34.2";
-    let url = `ws://${hostname}:${portValTemp}/ws`;
-    console.log(`hostname=${hostname}`);
+    let url = `ws://${hostname}:${port}/ws`;
+    console.log(`url=${url}`);
     let ws = new WebSocket(url);
 
     // WiFi ssid, security, password, port, and IP address index variables
@@ -46,59 +46,41 @@ document.addEventListener("DOMContentLoaded", function() {
         // get the table body of the WiFi hotspot list table
         let wifilisttbody = document.getElementById("wifilisttable").getElementsByTagName("tbody")[0];
         
-        // clear all existing rows from the WiFi hotspot table
-        let wifilistrows = wifilisttbody.getElementsByTagName("tr");
+        // clear all existing rows from the WiFi hotspot table class="wifihotspot" 
+        let wifilistrows = wifilisttbody.getElementsByClassName("wifihotspot");
         while (wifilistrows.length) {
             wifilisttbody.removeChild(wifilistrows[0]);
         }
+        let wifihotspotTemplate = document.getElementById("wifihotspotTemplate");
 
         let wifiIndex = 0;
         // iterate over each WiFi hotspot
         for (let wifi of payload["wifis"]) {
             console.log(wifi["ssid"]);
             // create table row for the current WiFi hotspot
-            let wifitablerow = document.createElement("tr");
-            wifitablerow.classList.add("wifihotspot");
-            wifitablerow.setAttribute("wifiindex", wifiIndex);
+            let newwifihotspot = wifihotspotTemplate.cloneNode(true);
+            newwifihotspot.classList.add("wifihotspot");
+            newwifihotspot.style.display = "block";
+            newwifihotspot.setAttribute("wifiindex", wifiIndex);
             wifiIndex++;
-            
-            // create and append current WiFi hotspot SSID to the table row
-            let wifiname = document.createElement("td");
-            wifiname.classList.add("wifiname");
+            let wifiname = newwifihotspot.getElementsByClassName("wifihotspotName")[0];
+            let wifisecurity = newwifihotspot.getElementsByClassName("wifihotspotSecurity")[0];
+            let wifirssi = newwifihotspot.getElementsByClassName("wifihotspotRSSI")[0];
+            let wificonnectBtn = newwifihotspot.getElementsByClassName("wifihotspotConnectBtn")[0];
+        
             wifiname.textContent = wifi["ssid"];
-            wifitablerow.appendChild(wifiname);
-            
-            // create and append current WiFi hotspot security to the table row
-            let wifisecurity = document.createElement("td");
-            wifisecurity.classList.add("wifisecurity");
             wifisecurity.textContent = wifi["security"];
-            wifitablerow.appendChild(wifisecurity);
-            
-            // create and append current WiFi hotspot rssi to the table row
-            let wifirssi = document.createElement("td");
             wifirssi.textContent = `${wifi["rssi"]} dBm`;
-            wifitablerow.appendChild(wifirssi);
-            
-            // create a table data containing a button to open up the connection menu for its
-            // corresponding WiFi hotspot.
-            let wificonnectbtntd = document.createElement("td");
-            let wificonnectbtn = document.createElement("button");
-            wificonnectbtn.textContent = "Connect";
-
             // add click function
             // when the connect button is clicked, the SSID and security of the corresponding WiFi
             // hotspot are saved, then the connection menu is opened.
-            wificonnectbtn.addEventListener("click", function() {
+            wificonnectBtn.addEventListener("click", function() {
                 let wifilistrow = this.parentElement.parentElement;
-                connectionConfig.ssidVal = wifilistrow.getElementsByClassName("wifiname")[0].textContent;
-                connectionConfig.securityVal = wifilistrow.getElementsByClassName("wifisecurity")[0].textContent;
+                connectionConfig.ssidVal = wifilistrow.getElementsByClassName("wifihotspotName")[0].textContent;
+                connectionConfig.securityVal = wifilistrow.getElementsByClassName("wifihotspotSecurity")[0].textContent;
                 setPage("connect");
             });
-            wificonnectbtntd.appendChild(wificonnectbtn);
-            wifitablerow.appendChild(wificonnectbtntd);
-
-            // append the current WiFi hotspot table row to the table.
-            wifilisttbody.appendChild(wifitablerow);
+            wifilisttbody.append(newwifihotspot);
         }
         // console.log(`l${wifilistrows.length}`);
         // for (row of wifilistrows) {
@@ -167,19 +149,16 @@ document.addEventListener("DOMContentLoaded", function() {
     // save password to variable upon input change
     connectPassInput.addEventListener("change", function() {
         connectionConfig.passVal = connectPassInput.value;
-        // alert(connectPass);
     });
 
     // save port number to variable upon input change 
     connectPortInput.addEventListener("change", function() {
         connectionConfig.portVal = connectPortInput.value;
-        // alert(connectPort);
     });
 
     // save IP address index number to variable upon input change 
     connectIPIndexInput.addEventListener("change", function() {
         connectionConfig.ipIndexVal = connectIPIndexInput.value;
-        // alert(connectIPIndex);
     });
 
     // back button in connect page will return to the wifi list page when clicked.
@@ -201,6 +180,6 @@ document.addEventListener("DOMContentLoaded", function() {
             port: connectionConfig.portVal
         };
         console.log(`sendConnection: payload=${JSON.stringify(payload)}`);
-        // saveConnection(ws, payload);
+        wsMod.saveConnection(ws, payload);
     });
 });

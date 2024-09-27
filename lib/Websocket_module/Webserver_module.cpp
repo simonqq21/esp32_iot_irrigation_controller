@@ -39,6 +39,33 @@ void WebserverModule::begin(EEPROMConfig* eC, RTCNTP* rtcntp, Relay* relay) {
         // request->send(200, "hhelloworld");
         request->send(200, "text/plain", "Hhhelloworld");
     });
+    _server->on("/", HTTP_GET, [](AsyncWebServerRequest* request) {
+        request->send(LittleFS, "/index.html", String(), false);
+    });
+    _server->on("/index.html", HTTP_GET, [](AsyncWebServerRequest* request) {
+        request->send(LittleFS, "/index.html", String(), false);
+    });
+    _server->on("/wifi.html", HTTP_GET, [](AsyncWebServerRequest* request) {
+        request->send(LittleFS, "/wifi.html", String(), false);
+    });
+    _server->on("/styles.css", HTTP_GET, [](AsyncWebServerRequest *request) {
+        request->send(LittleFS, "/styles.css", "text/css", false);
+    });
+    _server->on("/index.css", HTTP_GET, [](AsyncWebServerRequest *request) {
+        request->send(LittleFS, "/index.css", "text/css", false);
+    });
+    _server->on("/wifi.css", HTTP_GET, [](AsyncWebServerRequest *request) {
+        request->send(LittleFS, "/wifi.css", "text/css", false);
+    });
+    _server->on("/wsMod.js", HTTP_GET, [](AsyncWebServerRequest *request) {
+        request->send(LittleFS, "/wsMod.js", "text/javascript", false);
+    });
+    _server->on("/index.js", HTTP_GET, [](AsyncWebServerRequest *request) {
+        request->send(LittleFS, "/index.js", "text/javascript", false);
+    });
+    _server->on("/wifi.js", HTTP_GET, [](AsyncWebServerRequest *request) {
+        request->send(LittleFS, "/wifi.js", "text/javascript", false);
+    });
 }
 
 /*

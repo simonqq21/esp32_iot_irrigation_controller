@@ -110,7 +110,7 @@ void checkToResetWiFi() {
     resetWiFi["ssid"] = "default-SSID";
     resetWiFi["pass"] = "password";
     resetWiFi["ipIndex"] = 2;
-    resetWiFi["port"] = 5555;
+    resetWiFi["port"] = 7777;
     wsMod.receiveConnection(resetWiFi);
   }
 }
@@ -134,6 +134,10 @@ void sendTime() {
 
 void setup() {
   Serial.begin(115200);
+  // littleFS 
+  if (!LittleFS.begin()) {
+    Serial.println("An error occured while mounting LittleFS.");
+  }
 
   // init status LED
   statusLED.begin();

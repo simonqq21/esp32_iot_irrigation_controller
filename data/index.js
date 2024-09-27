@@ -1,12 +1,14 @@
 import * as wsMod from './wsMod.js';
 
 document.addEventListener("DOMContentLoaded", function() {
-    let port = 7777;
-    // let hostname = window.location.hostname;
-    let hostname = "192.168.5.70";
+    let port = window.location.port;
+    // let port = 7777;
+    let hostname = window.location.hostname;
+    // let hostname = "192.168.5.70";
     // let hostname = "192.168.4.1";
     let url = `ws://${hostname}:${port}/ws`;
     console.log(`hostname=${hostname}`);
+    console.log(`url=${url}`);
     let ws = new WebSocket(url);
 
     // DOM elements

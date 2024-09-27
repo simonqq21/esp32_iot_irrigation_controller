@@ -3,7 +3,7 @@
     <head>
 
         <title>ESP32 WiFi configuration</title>
-        <link rel="stylesheet" href="style.css">
+        <link rel="stylesheet" href="styles.css">
         <link rel="stylesheet" href="wifi.css">
         <script src="wifi.js" type="module"></script>
     </head>
@@ -28,28 +28,12 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <tr class="wifihotspot">
-                            <td>Hotspot1</td>
-                            <td>open</td>
-                            <td>-20dBm</td>
-                            <td>
-                                <button>Connect</button>
-                            </td>
-                        </tr>
-                        <tr class="wifihotspot">
-                            <td>Hotspot2</td>
-                            <td>wpa2-psk</td>
-                            <td>-30dBm</td>
-                            <td>
-                                <button>Connect</button>
-                            </td>
-                        </tr>
-                        <tr class="wifihotspot">
-                            <td>Hotspot3</td>
-                            <td>wpa2-psk</td>
-                            <td>-40dBm</td>
-                            <td>
-                                <button>Connect</button>
+                        <tr id="wifihotspotTemplate" style="display: none">
+                            <td class="wifihotspotName">Hotspot1</td>
+                            <td class="wifihotspotSecurity">open</td>
+                            <td class="wifihotspotRSSI">-20dBm</td>
+                            <td class="wifihotspotConnectBtnDiv">
+                                <button class="wifihotspotConnectBtn">Connect</button>
                             </td>
                         </tr>
                     </tbody>
