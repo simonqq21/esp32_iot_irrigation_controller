@@ -147,23 +147,13 @@ document.addEventListener("DOMContentLoaded", function() {
                     config.timeSlots[tsIndex].duration = 24*60*60-1;
                 }
                 element.value = config.timeSlots[tsIndex].duration;
-
-                let startTimeString = config.timeSlots[tsIndex].onStartTime;
-                let startTimeInDate = new Date();
-                startTimeInDate.setUTCHours(startTimeString.slice(0,2));
-                startTimeInDate.setUTCMinutes(startTimeString.slice(3,5));
-                startTimeInDate.setUTCSeconds(startTimeString.slice(6,8));
-                let endTimeInDate = new Date(startTimeInDate);
-                endTimeInDate.setUTCSeconds(endTimeInDate.getUTCSeconds() + config.timeSlots[tsIndex].duration);
-                console.log(`start = ${startTimeInDate.toISOString()}`);
-                console.log(`end = ${endTimeInDate.toISOString().slice(11,19)}`);
-
-                let endTimeString = endTimeInDate.toISOString().slice(11,19);
+                // let startTimeString = config.timeSlots[tsIndex].onStartTime;
+                let endTimeString = calculateEndTime(config.timeSlots[tsIndex].onStartTime, config.timeSlots[tsIndex].duration);
                 config.timeSlots[tsIndex].onEndTime = endTimeString + 'Z';
                 element.parentElement.parentElement.getElementsByClassName("timeSlotEndTime")[0].value = endTimeString;
                 
                 // 2024-09-27T04:01:00.981Z
-                console.log(config.timeSlots[tsIndex].duration);
+                // console.log(config.timeSlots[tsIndex].duration);
             });
         });
     }
@@ -340,6 +330,23 @@ document.addEventListener("DOMContentLoaded", function() {
         return duration;
     }
     
+    /**
+     * 
+     * @param {*} startTimeString 
+     * @param {*} duration 
+     */
+    function calculateEndTime(startTimeString, duration) {
+        let startTimeInDate = new Date();
+        startTimeInDate.setUTCHours(startTimeString.slice(0,2));
+        startTimeInDate.setUTCMinutes(startTimeString.slice(3,5));
+        startTimeInDate.setUTCSeconds(startTimeString.slice(6,8));
+        let endTimeInDate = new Date(startTimeInDate);
+        endTimeInDate.setUTCSeconds(endTimeInDate.getUTCSeconds() + duration);
+        // console.log(`start = ${startTimeInDate.toISOString()}`);
+        // console.log(`end = ${endTimeInDate.toISOString().slice(11,19)}`);
+        let endTimeString = endTimeInDate.toISOString().slice(11,19);
+        return endTimeString;
+    }
 
     /**
      * update the time setting div based on if NTP is enabled.
