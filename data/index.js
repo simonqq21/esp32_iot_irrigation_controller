@@ -2,7 +2,7 @@ import * as wsMod from './wsMod.js';
 
 document.addEventListener("DOMContentLoaded", function() {
     let port = window.location.port;
-    // let port = 7777;
+    // let port = 7778;
     let hostname = window.location.hostname;
     // let hostname = "192.168.5.70";
     // let hostname = "192.168.4.1";

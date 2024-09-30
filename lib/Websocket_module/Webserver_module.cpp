@@ -18,6 +18,8 @@ void (*WebserverModule::_receiveRelayStateFunc)();
 void (*WebserverModule::_receiveDateTimeFunc)();
 void (*WebserverModule::_receiveConfigFunc)();
 
+unsigned int previousPrintTime;
+
 WebserverModule::WebserverModule() {
 
 }
@@ -71,7 +73,6 @@ void WebserverModule::begin(EEPROMConfig* eC, RTCNTP* rtcntp, Relay* relay) {
 /*
 */
 void WebserverModule::connect() {
-   
     Serial.println("Connecting to wifi");
     // attempt to connect to wifi 
     IPAddress localIP;
@@ -83,18 +84,31 @@ void WebserverModule::connect() {
     delay(3000);
     // Serial.printf("Connected to %s\n", WiFi.SSID());
     Serial.printf("wifi status = %d\n", WiFi.status());
-    
-    if (WiFi.status() == WL_CONNECTED) {
-        localIP = WiFi.localIP();
-        Serial.println(WiFi.localIP());
-        gateway = WiFi.gatewayIP();
-        Serial.print("gateway IP = ");
-        Serial.println(gateway);
-        localIP[3] = _eC->getIPAddressIndex();
-        WiFi.config(localIP, gateway, subnet, dns);
-        Serial.println(WiFi.localIP());
+
+    // attempt to reconnect 5 times maximum, 2 seconds each.
+    for (int i=0;i<5;i++) {
+        if (WiFi.status() == WL_CONNECTED) {
+            localIP = WiFi.localIP();
+            Serial.println(WiFi.localIP());
+            gateway = WiFi.gatewayIP();
+            Serial.print("gateway IP = ");
+            Serial.println(gateway);
+            localIP[3] = _eC->getIPAddressIndex();
+            WiFi.config(localIP, gateway, subnet, dns);
+            Serial.println(WiFi.localIP());
+            break;
+        }
+        delay(2000);
     }
-    delay(3000);
+    if (WiFi.status() != WL_CONNECTED) {
+        WiFi.mode(WIFI_MODE_AP);
+        WiFi.softAP("ESP32_wifi_manager");
+        IPAddress apIP = IPAddress(192, 168, 4, 1);
+        IPAddress apSubnet = IPAddress(255,255,255,0);
+        WiFi.softAPConfig(apIP, apIP, apSubnet);
+        _apIP = WiFi.softAPIP();
+        Serial.println("started softAP");
+    }
 }
 
 /*
@@ -182,25 +196,12 @@ void WebserverModule::cleanupClients() {
 this method is called in the void loop 
 */
 void WebserverModule::checkWiFiStatusLoop() {
-    // Serial.printf("wifi status = %d\n", WiFi.status());
-    yield();
-    switch (WiFi.status()) {
-        // connected successfully
-        case WL_CONNECTED:
-            break;
-        // if not connected due to unavailable SSID or wrong credentials
-        default:
-            if (_apIP[0] < 1) {
-                WiFi.mode(WIFI_MODE_AP);
-                WiFi.softAP("ESP32_wifi_manager");
-                IPAddress apIP = IPAddress(192, 168, 4, 1);
-                IPAddress apSubnet = IPAddress(255,255,255,0);
-                WiFi.softAPConfig(apIP, apIP, apSubnet);
-                _apIP = WiFi.softAPIP();
-                Serial.println("started softAP");
-            }
-            // Serial.println(_apIP);
+    if (millis() - previousPrintTime > 50) {
+        Serial.printf("wifi status = %d\n", WiFi.status());
+        previousPrintTime = millis();
     }
+
+    yield();
 }
 
 void WebserverModule::handleWebSocketMessage(void *arg, uint8_t *data, size_t len) {
@@ -436,7 +437,6 @@ void WebserverModule::receiveData(String type, JsonDocument payloadJSON) {
     }
     else if (type == CONFIG_TYPE) {
         receiveConfig(payloadJSON);
-        // Serial.printf("_receiveConfigFunc = %d\n", *_receiveConfigFunc);
         if (_receiveConfigFunc != NULL) {
             _receiveConfigFunc();
         }

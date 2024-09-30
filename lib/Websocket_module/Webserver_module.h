@@ -201,6 +201,45 @@ from browser to ESP32
 }
 */
 
+
+
+
+/*
+    4,0
+    wifi.status = 3 when successfully connected to AP 
+    wifi.status = 6 when trying to connect
+    wifi.status = 1 when expected wifi doesn't exist either because of wrong credentials
+        or network just doens't exist.
+    wifi.status = 255 when in STA mode
+
+    when wifi credentials are wrong, 
+    6, 1, 255
+
+    when wifi credentials are correct, 
+    6, 3
+
+    when wifi hotspot doesn't exist upon startup,
+    6, 1, 255
+
+    when wifi hotspot stopped existing while working,
+    3, 255
+
+    Expected wifi connection behavior:
+        When ESP32 starts and attempts to connect with a wifi hotspot with correct credentials,
+    then it will connect successfully. 
+        When ESP32 starts and attempts to connect with a wifi hotspot with wrong credentials,
+    then it will fail to connect and start its own hotspot without resetting the saved wifi credentials.
+        When ESP32 starts and attempts to connect with a wifi hotspot that doesn't exist,
+    then it will start its own hotspot without resetting the saved wifi credentials.
+        When ESP32 starts and connects successfully to a wifi hotspot that suddenly disappears during
+    operation, then it must attempt to reconnect until the wifi hotspot reappears. 
+        The WiFi credentials in itys EEPROM must not be reset to default values except via websocket or physical 
+    button long press.
+
+    */
+
+
+
 // some definitions for JSON msg constants
 const String CMD_KEY = "cmd";
 const String TYPE_KEY = "type";
