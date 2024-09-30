@@ -7,6 +7,16 @@
 #include "Webserver_module.h"
 
 /*
+TODO:
+add a third mode: timer mode.
+  The relay is manually closed, and stays closed until either manually opened 
+  or the set timer runs out. 
+make the UI more user friendly, such as greying out the save button until a 
+  setting has been changed.
+Add a one click button to turn the relay on and off in one click.
+*/
+
+/*
 hardware pins
 */ 
 const int ledPin = 18;
