@@ -1,10 +1,10 @@
 import * as wsMod from './wsMod.js';
 
 document.addEventListener("DOMContentLoaded", function() {
-    let port = window.location.port;
-    // let port = 7778;
-    let hostname = window.location.hostname;
-    // let hostname = "192.168.5.70";
+    // let port = window.location.port;
+    // let hostname = window.location.hostname;
+    let port = 7778;
+    let hostname = "192.168.57.5";
     // let hostname = "192.168.4.1";
     let url = `ws://${hostname}:${port}/ws`;
     console.log(`hostname=${hostname}`);
@@ -65,7 +65,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
     manualTimeInput.addEventListener("change", () => {
         manualDateTimeVal.datetime = manualTimeInput.value;
-        // alert(manualDateTimeVal);
+        console.log(manualDateTimeVal);
     });
 
     ledModeInput.addEventListener("change", () => {
@@ -232,6 +232,7 @@ document.addEventListener("DOMContentLoaded", function() {
      */
     function updateDisplayedTime(payload) {
         document.getElementById("systemTime").textContent = payload["datetime"];
+        curDateTimeVal = payload["datetime"];
     }
 
     /**
@@ -265,6 +266,7 @@ document.addEventListener("DOMContentLoaded", function() {
         gmtOffsetInput.value = config["gmtOffsetSetting"];
         // set visible div based on NTP enabled value
         updateNtpEnableDivDisplay();
+        
         // update status LED value
         ledModeInput.value = config["ledSetting"];
         // update timer enabled value
@@ -366,19 +368,21 @@ document.addEventListener("DOMContentLoaded", function() {
      * Else, display the div to set the system date and time manually. 
      */
     function updateNtpEnableDivDisplay() {
+        manualTimeInput.value = curDateTimeVal.slice(0,19);
+        console.log(`manualTimeInput.value = ${manualTimeInput.value}`);
         if (ntpEnableInput.checked) {
             manualTimeInputDiv.style.display = "none";
             gmtOffsetInputDiv.style.display = "block";
         } else {
             manualTimeInputDiv.style.display = "block";
             gmtOffsetInputDiv.style.display = "none";
-            const now = new Date();
-            const year = now.getFullYear();
-            const month = String(now.getMonth() + 1).padStart(2, '0'); // Months are 0-indexed, so +1
-            const day = String(now.getDate()).padStart(2, '0');
-            const hours = String(now.getHours()).padStart(2, '0');
-            const minutes = String(now.getMinutes()).padStart(2, '0');
-            manualTimeInput.value = `${year}-${month}-${day}T${hours}:${minutes}`;
+            // const now = new Date();
+            // const year = now.getFullYear();
+            // const month = String(now.getMonth() + 1).padStart(2, '0'); // Months are 0-indexed, so +1
+            // const day = String(now.getDate()).padStart(2, '0');
+            // const hours = String(now.getHours()).padStart(2, '0');
+            // const minutes = String(now.getMinutes()).padStart(2, '0');
+            // manualTimeInput.value = `${year}-${month}-${day}T${hours}:${minutes}`;
             // 2024-09-25T01:08:34Z
         }
     }
