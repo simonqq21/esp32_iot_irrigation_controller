@@ -5,8 +5,8 @@ document.addEventListener("DOMContentLoaded", function() {
     setPage("listwifi");
 
     let port = window.location.port;
-    // let port = 7777;
     let hostname = window.location.hostname;
+    // let port = 7777;
     // let hostname = "192.168.5.70";
     // let hostname = "192.168.4.1";
     let url = `ws://${hostname}:${port}/ws`;
