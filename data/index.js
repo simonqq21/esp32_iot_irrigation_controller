@@ -71,6 +71,12 @@ document.addEventListener("DOMContentLoaded", function() {
     });
 
     // change eventListener for manualTimeInput
+    manualTimeInput.addEventListener("click", () => {
+        manualDateTimeVal.datetime = manualTimeInput.value;
+        // console.log(`manualtimeInput = ${JSON.stringify(manualDateTimeVal)}`);
+        // console.log(`manualtimeInput = ${manualDateTimeVal.datetime}`);
+    });
+    // change eventListener for manualTimeInput
     manualTimeInput.addEventListener("change", () => {
         manualDateTimeVal.datetime = manualTimeInput.value;
     });

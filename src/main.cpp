@@ -6,32 +6,57 @@
 #include "EEPROMConfig.h"
 #include "Webserver_module.h"
 
+/*
+hardware pins
+*/ 
 const int ledPin = 18;
 const int buttonPin = 4;
 const int relayPin = 13;
-
+/*
+hardware components
+*/
 LED statusLED(ledPin);
 Button button(buttonPin);
 Relay relay(relayPin);
-
+/*
+Major modules
+*/
 RTCNTP rtcntp;
 DateTime dtnow;
 EEPROMConfig eC;
 WebserverModule wsMod;
+/*
+misc variables
+*/
+// check timeslots once a second
 unsigned long lastTimeTimeSlotsChecked;
 int timeSlotCheckInterval = 1000;
+// for resetting wifi credentials by long pressing the button
 bool resetWiFi = false;
 bool resetWiFiBlinkLED = false;
 unsigned long resetWiFiTime;
+// send the time once a second
 unsigned long sendTimeInterval = 1000;
 unsigned long lastTimeTimeSent;
+/*
+If NTP update is called at the same time as the websocket sending data to the ESP32 when there is
+no access to the NTP server, such as when the configuration is saved with NTP enabled through a 
+WiFi connection that isn't connected to the internet, it will cause the watchdog to reset the ESP32. 
+Instead, there is a delay of around 3 seconds so that the 8-second delay caused by the NTP client 
+trying to connect to the NTP service simultaneously with the websocket code will not cause the 
+watchdog to reset.
+*/
+bool updateNTPFlag = false;
+unsigned long lastTimeUpdateTime;
+// relay state
 bool newRelayState;
 
 /*
-function run in loop to switch on the relay when any timeslot is on and if 
-timer is enabled.
+function in the loop to control the relay.
 */
 void checkRelayIfOn() {
+  // if automatic timer is enabled, check all timeslots if any one of them is on
+  // in the current time.
   if (eC.getTimerEnabled()) {
     if (millis() - lastTimeTimeSlotsChecked >= timeSlotCheckInterval) {
       lastTimeTimeSlotsChecked = millis();
@@ -39,18 +64,22 @@ void checkRelayIfOn() {
       newRelayState = eC.checkIfAnyTimeSlotOn(dtnow);
     }
   }
+  // else, get the saved manual relay setting.
   else {
     newRelayState = eC.getRelayManualSetting();
     // Serial.printf("newRelayState=%d\n", newRelayState);
   }
+  // only update the relay if the state has changed, minimizing flickering.
   if (newRelayState != relay.readState()) {
     // Serial.printf("before set %d, %d",newRelayState, relay.readState());
     relay.set(newRelayState);
     // Serial.printf("after set %d, %d",newRelayState, relay.readState());
+    // update relay state to client
     wsMod.sendCurrentRelayState(newRelayState);
   }
 }
 
+// function in loop to set the status LED mode.
 void setStatusLED() {
   switch (eC.getLEDSetting())
   {
@@ -67,7 +96,7 @@ void setStatusLED() {
 }
 
 /*
-toggle relay state when button is short pressed 
+callback function to toggle relay state when button is short pressed 
 */
 void buttonToggleRelay() {
   if (!eC.getTimerEnabled()) {
@@ -76,6 +105,9 @@ void buttonToggleRelay() {
   }
 }
 
+/*
+callback function to toggle the automatic timer when button is double pressed
+*/
 void buttonToggleTimerEnable() {
   eC.setTimerEnabled(!eC.getTimerEnabled());
   eC.saveMainConfig();
@@ -90,6 +122,10 @@ void buttonToggleTimerEnable() {
   Serial.printf("button set timer enable to %d\n", eC.getTimerEnabled());
 }
 
+/*
+callback function to write default wifi credential values to the EEPROM when 
+the button is long pressed.
+*/
 void buttonResetWiFi() {
   resetWiFi = true;
   resetWiFiBlinkLED = true;
@@ -97,6 +133,9 @@ void buttonResetWiFi() {
   Serial.println("button trigger reset wifi");
 }
 
+/*
+Loop function to reset the wifi credential values when requested.
+*/
 void checkToResetWiFi() {
   if (resetWiFiBlinkLED) {
     statusLED.startTimer(2000, true);
@@ -115,15 +154,35 @@ void checkToResetWiFi() {
   }
 }
 
+/*
+callback function to update NTP time when it is enabled.
+*/
 void updateTime() {
-  rtcntp.setGMTOffset(eC.getGMTOffset());
+  Serial.print("updateTIme: ");
+  Serial.println(eC.getNTPEnabled());
   if (eC.getNTPEnabled()) {
-    rtcntp.updateRTCWithNTP();
+    updateNTPFlag = true;
+    lastTimeUpdateTime = millis();
+    Serial.println("updateTime");
   }
-  dtnow = rtcntp.getRTCTime();
-  eC.checkIfAnyTimeSlotOn(dtnow, true);
 }
 
+/*
+function in loop to update NTP time 3 seconds after the websocket has completed
+its current operation. Read the comments at the top of the file. */
+void updateTimeInLoop() {
+  if (updateNTPFlag && millis() - lastTimeUpdateTime > 3000) {
+    updateNTPFlag = false;
+    rtcntp.setGMTOffset(eC.getGMTOffset());
+    rtcntp.updateRTCWithNTP();
+    dtnow = rtcntp.getRTCTime();
+    Serial.println("updateTimeInLoop");
+  }
+}
+
+/*
+function in loop to send time once a second to the client.
+*/
 void sendTime() {
   if (millis() - lastTimeTimeSent > sendTimeInterval) {
     lastTimeTimeSent = millis();
@@ -160,6 +219,7 @@ void setup() {
   // scan wifi
   wsMod.scanWiFi();
   wsMod.begin(&eC, &rtcntp, &relay);
+  // set websocket callback functions
   wsMod.setSendConnectionCallback();
   wsMod.setSendDateTimeCallback();
   wsMod.setSendRelayStateCallback();
@@ -194,4 +254,6 @@ void loop() {
   setStatusLED();
   checkToResetWiFi();
   sendTime();
+
+  updateTimeInLoop();
 }
