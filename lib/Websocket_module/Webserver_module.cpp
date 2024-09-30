@@ -196,7 +196,7 @@ void WebserverModule::cleanupClients() {
 this method is called in the void loop 
 */
 void WebserverModule::checkWiFiStatusLoop() {
-    if (millis() - previousPrintTime > 50) {
+    if (millis() - previousPrintTime > 1000) {
         Serial.printf("wifi status = %d\n", WiFi.status());
         previousPrintTime = millis();
     }

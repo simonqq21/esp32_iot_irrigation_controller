@@ -1,18 +1,20 @@
 import * as wsMod from './wsMod.js';
 
 document.addEventListener("DOMContentLoaded", function() {
+    /*
+    websocket configuration
+    */
     // let port = window.location.port;
     // let hostname = window.location.hostname;
     let port = 7778;
-    let hostname = "192.168.57.5";
+    let hostname = "192.168.57.70";
+    // let hostname = "192.168.5.70";
     // let hostname = "192.168.4.1";
-    let url = `ws://${hostname}:${port}/ws`;
-    console.log(`hostname=${hostname}`);
-    console.log(`url=${url}`);
-    let ws = new WebSocket(url);
 
-    // DOM elements
-    // relay status indicator text and visual
+    /*
+    DOM elements
+    */
+    // relay status indicator and text
     const relayStatusTextOutput = document.getElementById("relayStatusText");
     const relayStatusIndicatorOutput = document.getElementById("relayStatusIndicator");
     // device name input
@@ -25,6 +27,7 @@ document.addEventListener("DOMContentLoaded", function() {
     // manual time input div which will only be shown if NTP is disabled.
     const manualTimeInputDiv = document.getElementById("manualTimeInputDiv");
         const manualTimeInput = document.getElementById("manualTimeInput");
+        const saveTimeBtn = document.getElementById("saveTimeBtn");
     // status LED mode input
     const ledModeInput = document.getElementById("ledModeInput");
     // automatic timer enable input
@@ -36,11 +39,10 @@ document.addEventListener("DOMContentLoaded", function() {
     // time slots relay input div, which is only shown when automatic timer is enabled.
     const timeSlotsRelayDiv = document.getElementById("timeSlotsRelayDiv"); 
         // invisible timeSlot html template
-        let timeSlotTemplate = document.getElementsByClassName("timeSlotTemplate")[0];
+        let timeSlotTemplate = document.getElementById("timeSlotTemplate");
         timeSlotTemplate.style.display = "none";
         // list of all timeslots
         const timeSlotsInputs = timeSlotsRelayDiv.getElementsByClassName("timeSlot");
-        // let timeSlotsEnableds = document.querySelectorAll(".timeSlotEnabled");
         let timeSlotsEnableds = document.querySelectorAll(".timeSlotEnabled");
         let timeSlotsStartTimes = document.querySelectorAll(".timeSlotStartTime"); 
         let timeSlotsEndTimes = document.querySelectorAll(".timeSlotEndTime");
@@ -48,6 +50,10 @@ document.addEventListener("DOMContentLoaded", function() {
     // save config button
     const saveConfigBtn = document.getElementById("saveConfigBtn");
 
+    /*
+    Input eventListeners
+    */
+    // change eventListener for deviceNameInput
     deviceNameInput.addEventListener("change", () => {
         config.name = deviceNameInput.value;
     });
@@ -59,50 +65,57 @@ document.addEventListener("DOMContentLoaded", function() {
         config.ntpEnabledSetting = ntpEnableInput.checked;
     });
 
+    // change eventListener for gmtOffsetInput
     gmtOffsetInput.addEventListener("change", () => {
         config.gmtOffsetSetting = gmtOffsetInput.value;
     });
 
+    // change eventListener for manualTimeInput
     manualTimeInput.addEventListener("change", () => {
         manualDateTimeVal.datetime = manualTimeInput.value;
-        console.log(manualDateTimeVal);
     });
 
-    ledModeInput.addEventListener("change", () => {
-        config.ledSetting = ledModeInput.value;
-    });
-
-    timerEnableInput.addEventListener("change", () => {
-        // set visible div when timerEnableInput is changed
-        updateTimerEnableDivDisplay();
-        config.timerEnabledSetting = timerEnableInput.checked;
-    });
-
-    manualRelayInput.addEventListener("change", () => {
-        config.relayManualSetting = manualRelayInput.checked;
-    });
-
-    /**
-     * 
-     */
-    saveConfigBtn.addEventListener("click", () => {
-        //save config first before save datetime
-        wsMod.saveConfig(ws, config);
-        console.log("save config");
+    // click eventListener for saveTimeBtn
+    saveTimeBtn.addEventListener("click", (event) => {
+        event.preventDefault();
         if (!config.ntpEnabledSetting) {
             console.log(`save datetime ${JSON.stringify(manualDateTimeVal)}`);
             wsMod.saveDateTime(ws, manualDateTimeVal);
         }
     });
 
-    /**
-     * Setsthe callbacks for the input elements inside each timeslot.
-     */
+    // change eventListener for ledModeInput
+    ledModeInput.addEventListener("change", () => {
+        config.ledSetting = ledModeInput.value;
+    });
+
+    // change eventListener for timerEnableInput
+    timerEnableInput.addEventListener("change", () => {
+        // set visible div when timerEnableInput is changed
+        updateTimerEnableDivDisplay();
+        config.timerEnabledSetting = timerEnableInput.checked;
+    });
+
+    // change eventListener for manualRelayInput
+    manualRelayInput.addEventListener("change", () => {
+        config.relayManualSetting = manualRelayInput.checked;
+    });
+
+    // click eventListener for saveConfigBtn
+    saveConfigBtn.addEventListener("click", () => {
+        wsMod.saveConfig(ws, config);
+        console.log("save config");
+    });
+
+    // Set the callbacks for the input elements inside each timeslot.
     function setTimeSlotsCallbacks() {
+        // get the enabled, startTIme, endTime, and duration inputs for all timeSlots
+        // from the DOM
         timeSlotsEnableds = document.querySelectorAll(".timeSlotEnabled");
         timeSlotsStartTimes = document.querySelectorAll(".timeSlotStartTime"); 
         timeSlotsEndTimes = document.querySelectorAll(".timeSlotEndTime");
         timeSlotsDurations = document.querySelectorAll(".timeSlotDuration");
+        // set the change eventListeners for enabled input of each timeSlot
         // console.log(timeSlotsEnableds.length);
         timeSlotsEnableds.forEach(element => {
             element.addEventListener("change", () => {
@@ -116,6 +129,7 @@ document.addEventListener("DOMContentLoaded", function() {
         if endTime is updated, calculate for duration.
         if duration is updated, calculate for endTime.
         */
+       // set the change eventListeners for startTime of each timeSlot
         timeSlotsStartTimes.forEach(element => {
             element.addEventListener("change", () => {
                 let tsIndex = element.dataset.tsIndex;
@@ -130,6 +144,7 @@ document.addEventListener("DOMContentLoaded", function() {
                 // console.log(JSON.stringify(config)); 
             });
         });
+        // set the change eventListeners for endTime of each timeSlot
         timeSlotsEndTimes.forEach(element => {
             element.addEventListener("change", () => {
                 let tsIndex = element.dataset.tsIndex;
@@ -144,6 +159,7 @@ document.addEventListener("DOMContentLoaded", function() {
                 // console.log(JSON.stringify(config)); 
             });
         });
+        // set the change eventListeners for duration of each timeSlot
         timeSlotsDurations.forEach(element => {
             element.addEventListener("change", () => {
                 let tsIndex = element.dataset.tsIndex;
@@ -157,32 +173,27 @@ document.addEventListener("DOMContentLoaded", function() {
                     config.timeSlots[tsIndex].duration = 24*60*60-1;
                 }
                 element.value = config.timeSlots[tsIndex].duration;
-                // let startTimeString = config.timeSlots[tsIndex].onStartTime;
                 let endTimeString = calculateEndTime(config.timeSlots[tsIndex].onStartTime, config.timeSlots[tsIndex].duration);
                 config.timeSlots[tsIndex].onEndTime = endTimeString + 'Z';
-                element.parentElement.parentElement.getElementsByClassName("timeSlotEndTime")[0].value = endTimeString;
-                
+                element.parentElement.parentElement.getElementsByClassName("timeSlotEndTime")[0].value = endTimeString;              
                 // 2024-09-27T04:01:00.981Z
                 // console.log(config.timeSlots[tsIndex].duration);
             });
         });
     }
-
-    /*
-    TODO:
-    .load all configuration from ESP32 on startup 
-    .update system date and time display
-    .load all timeslots
-    .create variables to hold the local configuration
-    */
     
-    // variables for configuration and data
+    /*
+    variables for configuration and data
+    */
+    // current system date and time
     let curDateTimeVal = new Date(Date.UTC(2024, 0, 1, 0, 0, 0)).toISOString();
+    // date and time to be saved when NTP is not enabled
     let manualDateTimeVal = {
         datetime: new Date(Date.UTC(2024,1,1,0,0,0)).toISOString(),
     };
-    // console.log(`manualDateTimeVal = ${manualDateTimeVal}`);
+    // current relay state 
     let curRelayStateVal = false;
+    // EEPROM configuration
     let config = {
         name: "",
         ntpEnabledSetting: false, 
@@ -199,40 +210,49 @@ document.addEventListener("DOMContentLoaded", function() {
         ]
     };
 
-    // update the visible divs based on certain settings
-    updateNtpEnableDivDisplay();
-    updateTimerEnableDivDisplay();
+    
+    /*
+    Websocket 
+    */
+    let ws;
+    function initWS() {
+        let url = `ws://${hostname}:${port}/ws`;
+        console.log(`url=${url}`);
+        ws = new WebSocket(url);
 
-    // request for the date and time, relay state, and configuration upon websocket open
-    ws.addEventListener("open", (event) => {
-        wsMod.requestDateTime(ws);
-        wsMod.requestRelayState(ws);
-        wsMod.requestConfig(ws);
-    })
+        // request for the date and time, relay state, and configuration upon websocket open
+        ws.addEventListener("open", (event) => {
+            wsMod.requestDateTime(ws);
+            wsMod.requestRelayState(ws);
+            wsMod.requestConfig(ws);
+        })
+        // websocket message handler
+        ws.addEventListener("message", (event) => {
+            // define callbacks for receiving different types of data
+            // callbacks[cmd][type] = function(payload)
+            let callbacks = {
+                "datetime": updateDisplayedTime,
+                "relay_state": updateDisplayedRelayState,
+                "config": receiveConfigCallback,
+            }
+            wsMod.receiveData(event, callbacks);
+        });
+        // websocket close handler
+        ws.addEventListener("close", (event) => {
+            console.log("ws closed");
+            setTimeout(initWS, 100);
+        });
+    }
 
-    // websocket message handler
-    ws.addEventListener("message", (event) => {
-        // define callbacks for receiving different types of data
-        // callbacks[cmd][type] = function(payload)
-        let callbacks = {
-            "datetime": updateDisplayedTime,
-            "relay_state": updateDisplayedRelayState,
-            "config": receiveConfigCallback,
-        }
-        wsMod.receiveData(event, callbacks);
-    });
-
-    // websocket close handler
-    ws.addEventListener("close", (event) => {
-        console.log("ws closed");
-    });
-
+    /*
+    Websocket callback functions
+    */
     /**
      * Callback function to update displayed system date and time
      */
     function updateDisplayedTime(payload) {
-        document.getElementById("systemTime").textContent = payload["datetime"];
-        curDateTimeVal = payload["datetime"];
+        curDateTimeVal = payload["datetime"]
+        document.getElementById("systemTime").textContent = curDateTimeVal;
     }
 
     /**
@@ -266,7 +286,6 @@ document.addEventListener("DOMContentLoaded", function() {
         gmtOffsetInput.value = config["gmtOffsetSetting"];
         // set visible div based on NTP enabled value
         updateNtpEnableDivDisplay();
-        
         // update status LED value
         ledModeInput.value = config["ledSetting"];
         // update timer enabled value
@@ -274,6 +293,7 @@ document.addEventListener("DOMContentLoaded", function() {
         // set visible div based on timer enabled value
         updateTimerEnableDivDisplay();
         manualRelayInput.checked = config["relayManualSetting"];
+        // refresh all timeslots
         // remove all timeslots
         while (timeSlotsInputs.length > 1) {
             timeSlotsRelayDiv.removeChild(timeSlotsInputs[0]);
@@ -283,8 +303,7 @@ document.addEventListener("DOMContentLoaded", function() {
             // clone timeslot template, make it visible, and change the classname
             let newTimeSlot = timeSlotTemplate.cloneNode(true);
             newTimeSlot.classList.add("timeSlot");
-            newTimeSlot.classList.remove("timeSlotTemplate");
-            // get the fields of the new timeslot element
+            // get the elements of the new timeslot element from the DOM
             let timeSlotIndex = newTimeSlot.getElementsByClassName("timeSlotIndex")[0];
             let timeSlotEnabled = newTimeSlot.getElementsByClassName("timeSlotEnabled")[0]; 
             let timeSlotStartTime = newTimeSlot.getElementsByClassName("timeSlotStartTime")[0];  
@@ -296,7 +315,7 @@ document.addEventListener("DOMContentLoaded", function() {
             timeSlotStartTime.dataset.tsIndex = i;
             timeSlotEndTime.dataset.tsIndex = i;
             timeSlotDuration.dataset.tsIndex = i;
-            console.log(`dataset.tsIndex = ${timeSlotIndex.dataset.tsIndex}`);
+            // console.log(`dataset.tsIndex = ${timeSlotIndex.dataset.tsIndex}`);
             // set the values from the config into the fields of the new timeslot element
             timeSlotIndex.textContent = config["timeSlots"][i]["index"];
             timeSlotEnabled.checked = config["timeSlots"][i]["enabled"];
@@ -312,17 +331,17 @@ document.addEventListener("DOMContentLoaded", function() {
             newTimeSlot.style.display = "block";
             timeSlotsRelayDiv.appendChild(newTimeSlot);
         }
-        
+        // set callbacks for all timeslots
         setTimeSlotsCallbacks();
     }
 
     /**
-             * Computes for the duration of a timeslot in seconds given the start and end times 
-             * of the day in ISO time format.
-             * @param {String} startTimeString 
-             * @param {String} endTimeString 
-             * @returns {Number} duration
-             */
+     * Calculate duration of a timeslot in seconds given the start and end times 
+     * of the day.
+     * @param {String} startTimeString - starting time of the day in ISO time format.
+     * @param {String} endTimeString - ending time of the day in ISO time format.
+     * @returns {Number} duration - number of seconds between the starting time and ending time.
+     */
     function calculateDuration(startTimeString, endTimeString) {
         // calculate the duration in seconds
         let startTimeInDate = new Date();
@@ -345,9 +364,10 @@ document.addEventListener("DOMContentLoaded", function() {
     }
     
     /**
-     * 
-     * @param {*} startTimeString 
-     * @param {*} duration 
+     * Calculate end time given the start time and duration.
+     * @param {String} startTimeString - starting time of the day in ISO time format.
+     * @param {Number} duration - number of seconds to add to the starting time.
+     * @returns {String} endTimeString - ending time of the day in ISO time format.
      */
     function calculateEndTime(startTimeString, duration) {
         let startTimeInDate = new Date();
@@ -363,13 +383,14 @@ document.addEventListener("DOMContentLoaded", function() {
     }
 
     /**
-     * update the time setting div based on if NTP is enabled.
+     * Callback function to set the visible div depending on ntpEnableInput value.
      * If NTP is enabled, display the div with the input to set GMT offset. 
      * Else, display the div to set the system date and time manually. 
      */
     function updateNtpEnableDivDisplay() {
         manualTimeInput.value = curDateTimeVal.slice(0,19);
-        console.log(`manualTimeInput.value = ${manualTimeInput.value}`);
+        manualDateTimeVal.datetime = curDateTimeVal.slice(0,19);
+        // console.log(`manualTimeInput.value = ${manualTimeInput.value}`);
         if (ntpEnableInput.checked) {
             manualTimeInputDiv.style.display = "none";
             gmtOffsetInputDiv.style.display = "block";
@@ -406,5 +427,10 @@ document.addEventListener("DOMContentLoaded", function() {
     // console.log(element);
     // element.getElementsByClassName('tsEnabledInput')[0].checked = true;
     // console.log(element.getElementsByClassName('tsEnabledInput')[0].checked);
-    
+
+    // initws
+    initWS();
+    // update all visible divs on page load
+    updateNtpEnableDivDisplay();
+    updateTimerEnableDivDisplay();
 });

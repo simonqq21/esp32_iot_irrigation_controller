@@ -76,11 +76,15 @@ bool RTCNTP::refreshNTPTime() {
     _ntpClient.setTimeOffset(_gmtOffsetInHours * 3600); // UTC+8 for Philippines
     // when there is no NTP connection, update returns 0 and isTimeSet returns 0
     // when there is NTP connection, update returns 0 and isTimeSet returns 1
-    Serial.println("before ntp client update");
     _ntpClient.update();
-    Serial.println("after ntp client update");
     _ntpUpdateStatus = _ntpClient.isTimeSet();
-    // Serial.printf("ntpUpdateStatus=%d, isTimeSet=%d\n", _ntpUpdateStatus, _ntpClient.isTimeSet());
+    Serial.printf("ntpUpdateStatus=%d, isTimeSet=%d\n", _ntpUpdateStatus, _ntpClient.isTimeSet());
+    /*
+    ntpUpdateStatus=0, isTimeSet=0 when wifi has no access to NTP server or when it is in STA mode
+        (which obviously has no connection to the NTP server.)
+    ntpUpdateStatus=1, isTimeSet=1 when wifi has access to NTP server.
+    */
+
     return _ntpUpdateStatus;
 }
 

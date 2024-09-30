@@ -43,6 +43,7 @@
                 <div id="manualTimeInputDiv">
                     <span>Set date and time manually: </span>
                     <input id="manualTimeInput" type="datetime-local" step="1">
+                    <button id="saveTimeBtn">Save</button>
                 </div>
                 <div>
                     <span>Status LED setting: </span>
@@ -64,7 +65,7 @@
             <input type="checkbox" id="manualRelayInput">
         </div>
         <div id="timeSlotsRelayDiv">
-            <div id="timeSlotTemplate" class="timeSlotTemplate" data-index="0" style="border: 2px solid black;">
+            <div id="timeSlotTemplate" data-index="0" style="border: 2px solid black;">
                 <div>
                     <span>Timeslot </span>
                     <span class="timeSlotIndex">0</span>
