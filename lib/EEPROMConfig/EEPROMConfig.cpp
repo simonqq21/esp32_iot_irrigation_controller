@@ -140,7 +140,8 @@ void TimeSlot::setOnOffFullDateTimes(DateTime now, bool interrupt) {
     if (!interrupt) {
         //if interrupt is false then only proceed if the current state is off and 
         // the datetime now is after the onEndFullTime.
-        if (_currentState || now <= _onEndFullTime)
+        //  || now <= _onEndFullTime
+        if (_currentState)
             return;
     }
     // assign date now to the start time
@@ -148,15 +149,24 @@ void TimeSlot::setOnOffFullDateTimes(DateTime now, bool interrupt) {
         _tS->onStartTime.hour(), _tS->onStartTime.minute(), _tS->onStartTime.second());
     // assign date now to the end time 
     _onEndFullTime = DateTime(now.year(), now.month(), now.day(), 
-    _tS->onEndTime.hour(), _tS->onEndTime.minute(), _tS->onEndTime.second());
+        _tS->onEndTime.hour(), _tS->onEndTime.minute(), _tS->onEndTime.second());
 
     /* 
     compare the start and end times
     if the start datetime has a higher or equal time than the end datetime, 
         add one day to the end datetime.
+    7:40-7:30
+    if now = 7:40, add 1 day to endTime
+    if now = 7:45, add 1 day to endTime
+    if now = 1:00, subtract 1 day from startTime
     */
     if (_onStartFullTime >= _onEndFullTime) {
-        _onEndFullTime = _onEndFullTime + TimeSpan(60*60*24);
+        if (now.hour()*60*60+now.minute()*60+now.second() < _onEndFullTime.hour()*60*60+_onEndFullTime.minute()*60+_onEndFullTime.second()) {
+            _onStartFullTime = _onStartFullTime - TimeSpan(60*60*24);
+        }
+        else {
+            _onEndFullTime = _onEndFullTime + TimeSpan(60*60*24);
+        }
     }
 
     // Serial.printf("start= %04d/%02d/%02d %02d:%02d:%02d\n", _onStartFullTime.year(), _onStartFullTime.month(),
@@ -167,6 +177,10 @@ void TimeSlot::setOnOffFullDateTimes(DateTime now, bool interrupt) {
 
 bool TimeSlot::checkIfOn(DateTime now, bool interrupt) {
     this->setOnOffFullDateTimes(now, interrupt);
+    // Serial.printf("start= %04d/%02d/%02d %02d:%02d:%02d\n", _onStartFullTime.year(), _onStartFullTime.month(),
+    //     _onStartFullTime.day(), _onStartFullTime.hour(), _onStartFullTime.minute(), _onStartFullTime.second());
+    // Serial.printf("end= %04d/%02d/%02d %02d:%02d:%02d\n\n", _onEndFullTime.year(), _onEndFullTime.month(),
+    //     _onEndFullTime.day(), _onEndFullTime.hour(), _onEndFullTime.minute(), _onEndFullTime.second());
     if (_tS->enabled) {
         if (now >= _onStartFullTime && now <= _onEndFullTime) {
             _currentState = true;
