@@ -137,13 +137,13 @@ void TimeSlot::setOnOffFullDateTimes(DateTime now, bool interrupt) {
         timeslot is on, which ay cause the timeslot state to suddenly toggle.
     */
     // Serial.println("set full on off date times");
-    if (!interrupt) {
-        //if interrupt is false then only proceed if the current state is off and 
-        // the datetime now is after the onEndFullTime.
-        //  || now <= _onEndFullTime
-        if (_currentState)
-            return;
-    }
+    // if (!interrupt) {
+    //     //if interrupt is false then only proceed if the current state is off and 
+    //     // the datetime now is after the onEndFullTime.
+    //     //  || now <= _onEndFullTime
+    //     if (_currentState)
+    //         return;
+    // }
     // assign date now to the start time
     _onStartFullTime = DateTime(now.year(), now.month(), now.day(), 
         _tS->onStartTime.hour(), _tS->onStartTime.minute(), _tS->onStartTime.second());
