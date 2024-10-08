@@ -65,19 +65,31 @@ bool newRelayState;
 function in the loop to control the relay.
 */
 void checkRelayIfOn() {
-  // if automatic timer is enabled, check all timeslots if any one of them is on
-  // in the current time.
-  if (eC.getTimerEnabled()) {
-    if (millis() - lastTimeTimeSlotsChecked >= timeSlotCheckInterval) {
-      lastTimeTimeSlotsChecked = millis();
-      dtnow = rtcntp.getRTCTime();
-      newRelayState = eC.checkIfAnyTimeSlotOn(dtnow);
-    }
-  }
-  // else, get the saved manual relay setting.
-  else {
-    newRelayState = eC.getRelayManualSetting();
-    // Serial.printf("newRelayState=%d\n", newRelayState);
+  switch (eC.getOperationMode()) {
+    // manual mode
+    case 1:
+      newRelayState = eC.getRelayManualSetting();
+      // Serial.printf("newRelayState=%d\n", newRelayState);
+      break;
+    // if automatic timer is enabled, check all timeslots if any one of them is on
+    // in the current time.
+    case 2:
+      if (millis() - lastTimeTimeSlotsChecked >= timeSlotCheckInterval) {
+        lastTimeTimeSlotsChecked = millis();
+        dtnow = rtcntp.getRTCTime();
+        newRelayState = eC.checkIfAnyTimeSlotOn(dtnow);
+      }
+      break;
+    // countdown timer mode
+    case 3:
+      if (millis() - lastTimeTimeSlotsChecked >= 50) {
+        lastTimeTimeSlotsChecked = millis();
+        newRelayState = eC.checkCountdownTimer(100);
+      }
+      break;
+    default:
+      newRelayState = false;
+    
   }
   // only update the relay if the state has changed, minimizing flickering.
   if (newRelayState != relay.readState()) {
@@ -109,27 +121,37 @@ void setStatusLED() {
 callback function to toggle relay state when button is short pressed 
 */
 void buttonToggleRelay() {
-  if (!eC.getTimerEnabled()) {
-    eC.setRelayManualSetting(!relay.readState());
-    Serial.printf("button set relay to %d\n", relay.readState());
+  switch (eC.getOperationMode()) {
+    case 1:
+      eC.setRelayManualSetting(!relay.readState());
+      Serial.printf("button set relay to %d\n", eC.getRelayManualSetting());
+      break;
+    case 3:
+      if (eC.checkCountdownTimer()) {
+        eC.stopCountdownTimer();
+      }
+      else {
+        eC.startCountdownTimer();
+      }
+      break;
+    default:
+      break;
   }
 }
 
 /*
 callback function to toggle the automatic timer when button is double pressed
 */
-void buttonToggleTimerEnable() {
-  eC.setTimerEnabled(!eC.getTimerEnabled());
+void buttonToggleOperationMode() {
+  if (eC.getOperationMode() < 3) {
+    eC.setOperationMode(eC.getOperationMode()+1);
+  } else {
+    eC.setOperationMode(0);
+  }
   eC.saveMainConfig();
-  if (eC.getTimerEnabled()) {
-    statusLED.startTimer(1000, true);
-    statusLED.blink(100, 0.5);
-  }
-  else {
-    statusLED.startTimer(1000, true);
-    statusLED.blink(800, 0.5);
-  }
-  Serial.printf("button set timer enable to %d\n", eC.getTimerEnabled());
+  statusLED.startTimer(1000*eC.getOperationMode(), true);
+  statusLED.blink(1000, 0.5);
+  Serial.printf("button set operation mode to %d\n", eC.getOperationMode());
 }
 
 /*
@@ -215,7 +237,7 @@ void setup() {
   button.begin();
   button.setShortPressFunc(buttonToggleRelay);
   button.setLongPressFunc(buttonResetWiFi);
-  button.setDoublePressFunc(buttonToggleTimerEnable);
+  button.setDoublePressFunc(buttonToggleOperationMode);
   
   // init relay
   relay.begin();

@@ -11,30 +11,18 @@
 #define PASS_LENGTH 32 
 #define NAME_LENGTH 32 
 
-/*
-07:00-08:00
-08:00-08:00
-08:00-07:00
-23:00-01:00
-23:00-00:00
-
-// same day
-if (end > start) {
-    end and start are combined with the date today
-}
-// next day
-else {
-    start is combined with the date today while end is combined with the date tomorrow
-}
-if now > start && now < end
-
-*/
 struct timeSlot {
     unsigned short index;
     short initialized;
     bool enabled;
     DateTime onStartTime, onEndTime; // nonvolatile time only values for on start and on end
     unsigned int durationInSeconds;
+};
+
+struct countdownTimer {
+    long timeRemaining;
+    unsigned long lastTimeChecked;
+    bool pause;
 };
 
 struct connectionConfig {
@@ -48,10 +36,12 @@ struct mainConfig {
     char deviceName[NAME_LENGTH];
     bool ntpEnabledSetting;
     short gmtOffsetSetting;
-    bool timerEnabledSetting;
+    // bool timerEnabledSetting;
+    int operationModeSetting; // 0 for disabled, 1 for manual, 2 for daily timer, and 3 for countdown timer
     short ledSetting;
     bool relayManualSetting;
     timeSlot timeSlots[NUMBER_OF_TIMESLOTS];
+    long countdownDurationSetting;
 };
 
 struct eepromConfig {
@@ -119,8 +109,10 @@ class EEPROMConfig {
         void setNTPEnabled(bool ntpEnabled);
         short getGMTOffset();
         void setGMTOffset(short gmtOffset);
-        bool getTimerEnabled();
-        void setTimerEnabled(bool timerEnabled);
+        
+        int getOperationMode();
+        void setOperationMode(int operationMode);
+
         short getLEDSetting();
         void setLEDSetting(short ledSetting);
         bool getRelayManualSetting();
@@ -128,10 +120,20 @@ class EEPROMConfig {
         TimeSlot* getTimeSlot(int index);
         bool checkIfAnyTimeSlotOn(DateTime now, bool interrupt=false);
 
+        unsigned long getCountdownDuration();
+        void setCountdownDuration(unsigned long countdownDuration);
+
+        void startCountdownTimer();
+        void stopCountdownTimer();
+        bool checkCountdownTimer(unsigned long min_ms = 1000);
+        void pauseCountdownTimer();
+        void unpauseCountdownTimer();
+
     private:
         unsigned int _eepromAddr, _connectionConfigAddr, _mainConfigAddr;
         eepromConfig _eC;
         TimeSlot* _timeslots[NUMBER_OF_TIMESLOTS];
+        countdownTimer countdownTimerVars;
 };
 
 #endif

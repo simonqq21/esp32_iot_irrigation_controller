@@ -96,7 +96,7 @@ from ESP32 to browser
         name: string,
         ntpEnabledSetting: bool,
         gmtOffsetSetting: int, 
-        timerEnabledSetting: bool,
+        operationModeSetting: int,
         ledSetting: int,
         relayManualSetting: bool,
         timeSlots[]: timeSlot[] {
@@ -105,6 +105,7 @@ from ESP32 to browser
             onStartTime: string (ISO datetime),
             onEndTime: string (ISO datetime),
         },
+        countdownDurationSetting: unsigned long,
     },
 }
 
@@ -189,7 +190,7 @@ from browser to ESP32
         name: string,
         ntpEnabledSetting: bool,
         gmtOffsetSetting: int, 
-        timerEnabledSetting: bool,
+        operationModeSetting: int,
         ledSetting: int,
         timeSlots[]: timeSlot[] {
             index: int,
@@ -197,8 +198,20 @@ from browser to ESP32
             onStartTime: string (ISO time),
             onEndTime: string (ISO time),
         },
+        countdownDurationSetting: unsigned long,
     },
 }
+
+- browser switch relay state (without saving)
+switches relay state in manual mode and starts/stops the countdown timer
+{
+    cmd: "switch",
+    type: "relay_state",
+    payload: {
+        relay_state: bool,
+    },
+}
+
 */
 
 
@@ -248,6 +261,7 @@ const String PAYLOAD_KEY = "payload";
 const String LOAD_CMD = "load";
 const String SAVE_CMD = "save";
 const String REQUEST_CMD = "request";
+const String SWITCH_CMD = "switch";
 const String CONNECTION_TYPE = "connection";
 const String RELAY_STATE_TYPE = "relay_state"; 
 const String DATETIME_TYPE = "datetime"; 
@@ -289,8 +303,9 @@ class WebserverModule {
         static void receiveRelayState(JsonDocument inputPayloadJSON);
         static void receiveDateTime(JsonDocument inputPayloadJSON);
         static void receiveConfig(JsonDocument inputPayloadJSON);
+        static void switchRelayState(JsonDocument inputPayloadJSON);
         // method to handle receiving different kinds of data from the client browser 
-        static void receiveData(String type, JsonDocument payloadJSON);
+        static void receiveData(String cmd, String type, JsonDocument payloadJSON);
         // set callbacks for receiving methods
         static void setReceiveConnectionCallback(void (*callback)() = NULL);
         static void setReceiveRelayStateCallback(void (*callback)() = NULL);
@@ -316,6 +331,8 @@ class WebserverModule {
         static void (*_receiveRelayStateFunc)();
         static void (*_receiveDateTimeFunc)();
         static void (*_receiveConfigFunc)();
+
+        static void (*_switchRelayStateFunc)();
 };
 
 #endif

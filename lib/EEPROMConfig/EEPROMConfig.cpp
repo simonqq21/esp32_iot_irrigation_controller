@@ -215,7 +215,7 @@ void EEPROMConfig::print() {
     Serial.printf("Device name = %s\n", this->getName());
     Serial.printf("ntpEnabledSetting=%d\n", this->getNTPEnabled());
     Serial.printf("gmtOffsetSetting=%d\n", this->getGMTOffset());
-    Serial.printf("timerEnabledSetting=%d\n", this->getTimerEnabled());
+    Serial.printf("operationModeSetting=%d\n", this->getOperationMode());
     Serial.printf("ledSetting=%d\n", this->getLEDSetting());
     Serial.printf("relayManualSetting=%d\n", this->getRelayManualSetting());
     Serial.println();
@@ -326,12 +326,20 @@ void EEPROMConfig::setGMTOffset(short gmtOffset) {
     _eC._mainConfig.gmtOffsetSetting = gmtOffset;
 }
 
-bool EEPROMConfig::getTimerEnabled() {
-    return _eC._mainConfig.timerEnabledSetting;
+// bool EEPROMConfig::getTimerEnabled() {
+//     return _eC._mainConfig.timerEnabledSetting;
+// }
+
+// void EEPROMConfig::setTimerEnabled(bool timerEnabled) {
+//     _eC._mainConfig.timerEnabledSetting = timerEnabled;
+// }
+
+int EEPROMConfig::getOperationMode() {
+    return _eC._mainConfig.operationModeSetting;
 }
 
-void EEPROMConfig::setTimerEnabled(bool timerEnabled) {
-    _eC._mainConfig.timerEnabledSetting = timerEnabled;
+void EEPROMConfig::setOperationMode(int operationMode){
+    _eC._mainConfig.operationModeSetting = operationMode;
 }
 
 short EEPROMConfig::getLEDSetting() {
@@ -363,4 +371,45 @@ bool EEPROMConfig::checkIfAnyTimeSlotOn(DateTime now, bool interrupt) {
         }
     }
     return false;
+}
+
+unsigned long EEPROMConfig::getCountdownDuration() {
+    return _eC._mainConfig.countdownDurationSetting;
+}
+void EEPROMConfig::setCountdownDuration(unsigned long countdownDuration) {
+    _eC._mainConfig.countdownDurationSetting = countdownDuration;
+}
+
+void EEPROMConfig::startCountdownTimer() {
+    Serial.println("countdown timer started");
+    countdownTimerVars.timeRemaining = _eC._mainConfig.countdownDurationSetting;
+    countdownTimerVars.lastTimeChecked = millis();
+    countdownTimerVars.pause = false;
+}
+
+void EEPROMConfig::stopCountdownTimer() {
+    Serial.println("countdown timer stopped");
+    countdownTimerVars.timeRemaining = -1;
+    countdownTimerVars.pause = true;
+}
+
+bool EEPROMConfig::checkCountdownTimer(unsigned long min_ms) {
+    if (countdownTimerVars.timeRemaining > min_ms && !countdownTimerVars.pause) {
+        unsigned long timeDifference = millis() - countdownTimerVars.lastTimeChecked;
+        countdownTimerVars.timeRemaining -= timeDifference;
+        countdownTimerVars.lastTimeChecked = millis();
+        Serial.printf("timeRemaining=%d\n", countdownTimerVars.timeRemaining);
+        return (countdownTimerVars.timeRemaining > 0)? 1:0;
+    }
+    else {
+        return 0;
+    }
+}
+
+void EEPROMConfig::pauseCountdownTimer() {
+    countdownTimerVars.pause = true;
+}
+
+void EEPROMConfig::unpauseCountdownTimer() {
+    countdownTimerVars.pause = false;
 }

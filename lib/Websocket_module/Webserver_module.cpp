@@ -17,6 +17,7 @@ void (*WebserverModule::_receiveConnectionFunc)();
 void (*WebserverModule::_receiveRelayStateFunc)();
 void (*WebserverModule::_receiveDateTimeFunc)();
 void (*WebserverModule::_receiveConfigFunc)();
+void (*WebserverModule::_switchRelayStateFunc)();
 
 unsigned int previousPrintTime;
 
@@ -233,7 +234,10 @@ void WebserverModule::handleWebSocketMessage(void *arg, uint8_t *data, size_t le
             handleRequest(type, payloadJSON);
         }
         else if (cmd == SAVE_CMD) {
-            receiveData(type, payloadJSON);
+            receiveData(cmd, type, payloadJSON);
+        }
+        else if (cmd == SWITCH_CMD) {
+            receiveData(cmd, type, payloadJSON);
         }
     }
 }
@@ -301,7 +305,7 @@ void WebserverModule::sendConfig(JsonDocument inputPayloadJSON) {
         payloadJSON["name"] = _eC->getName();
         payloadJSON["ntpEnabledSetting"] = _eC->getNTPEnabled();
         payloadJSON["gmtOffsetSetting"] = _eC->getGMTOffset();
-        payloadJSON["timerEnabledSetting"] = _eC->getTimerEnabled();
+        payloadJSON["operationModeSetting"] = _eC->getOperationMode();
         payloadJSON["ledSetting"] = _eC->getLEDSetting();
         payloadJSON["relayManualSetting"] = _eC->getRelayManualSetting();
         JsonArray timeSlotsJSON = payloadJSON["timeSlots"].to<JsonArray>();
@@ -315,6 +319,7 @@ void WebserverModule::sendConfig(JsonDocument inputPayloadJSON) {
             timeSlotJSON["onEndTime"] = curTS->getOnEndTimeISOString();
             // timeSlotJSON["durationInSeconds"] = curTS->getDuration();
         }
+        payloadJSON["countdownDurationSetting"] = _eC->getCountdownDuration();
 
     serializeJson(_jsonDoc, _strData);
     Serial.printf("serialized JSON = %s\n", _strData);
@@ -401,7 +406,7 @@ void WebserverModule::receiveConfig(JsonDocument inputPayloadJSON) {
     _eC->setName(inputPayloadJSON["name"]);
     _eC->setNTPEnabled(inputPayloadJSON["ntpEnabledSetting"]);
     _eC->setGMTOffset(inputPayloadJSON["gmtOffsetSetting"]);
-    _eC->setTimerEnabled(inputPayloadJSON["timerEnabledSetting"]);
+    _eC->setOperationMode(inputPayloadJSON["operationModeSetting"]);
     _eC->setRelayManualSetting(inputPayloadJSON["relayManualSetting"]);
     _eC->setLEDSetting(inputPayloadJSON["ledSetting"]);
     for (int i=0;i<NUMBER_OF_TIMESLOTS;i++) {
@@ -412,36 +417,66 @@ void WebserverModule::receiveConfig(JsonDocument inputPayloadJSON) {
         _eC->getTimeSlot(i)->setOnEndTimeISOString(inputPayloadJSON["timeSlots"][i]["onEndTime"], 
             _rtcntp->getRTCTime());
     }
+    _eC->setCountdownDuration(inputPayloadJSON["countdownDurationSetting"]);
     _eC->saveMainConfig();
     Serial.println("saved config");
 }
 
-void WebserverModule::receiveData(String type, JsonDocument payloadJSON) {
-    if (type == CONNECTION_TYPE) {
-        receiveConnection(payloadJSON);
-        if (_receiveConnectionFunc != NULL) {
-            _receiveConnectionFunc();
+/**
+ * when relay state is switched,
+ * if in manual operation mode, set relay state to value.
+ * else if in countdown timer mode, start or stop the countdown timer.
+ */
+void WebserverModule::switchRelayState(JsonDocument inputPayloadJSON) {
+    if (_eC->getOperationMode() == 1) {
+        _eC->setRelayManualSetting(inputPayloadJSON["relay_state"]);
+    }
+    else if (_eC->getOperationMode() == 3) {
+        if (inputPayloadJSON["relay_state"]) {
+            _eC->startCountdownTimer();
+        }
+        else {
+            _eC->stopCountdownTimer();
         }
     }
-    else if (type == RELAY_STATE_TYPE) {
-        receiveRelayState(payloadJSON);
-        if (_receiveRelayStateFunc != NULL) {
-            _receiveRelayStateFunc();
+}
+
+void WebserverModule::receiveData(String cmd, String type, JsonDocument payloadJSON) {
+    if (cmd == SAVE_CMD) {
+        if (type == CONNECTION_TYPE) {
+            receiveConnection(payloadJSON);
+            if (_receiveConnectionFunc != NULL) {
+                _receiveConnectionFunc();
+            }
+        }
+        else if (type == RELAY_STATE_TYPE) {
+            receiveRelayState(payloadJSON);
+            if (_receiveRelayStateFunc != NULL) {
+                _receiveRelayStateFunc();
+            }
+        }
+        else if (type == DATETIME_TYPE) {
+            receiveDateTime(payloadJSON);
+            if (_receiveDateTimeFunc != NULL) {
+                _receiveDateTimeFunc();
+            }  
+        }
+        else if (type == CONFIG_TYPE) {
+            receiveConfig(payloadJSON);
+            if (_receiveConfigFunc != NULL) {
+                _receiveConfigFunc();
+            }
         }
     }
-    else if (type == DATETIME_TYPE) {
-        receiveDateTime(payloadJSON);
-        if (_receiveDateTimeFunc != NULL) {
-            _receiveDateTimeFunc();
-        }  
-    }
-    else if (type == CONFIG_TYPE) {
-        receiveConfig(payloadJSON);
-        if (_receiveConfigFunc != NULL) {
-            _receiveConfigFunc();
+    else if (cmd == SWITCH_CMD) {
+        if (type == RELAY_STATE_TYPE) {
+            switchRelayState(payloadJSON);
+            if (_switchRelayStateFunc != NULL) {
+                _switchRelayStateFunc();
+            }
         }
-        
     }
+    
     else {
         _ws.textAll("Invalid save");
     }

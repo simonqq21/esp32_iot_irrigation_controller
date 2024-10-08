@@ -54,8 +54,13 @@
                     </select>
                 </div>
                 <div>
-                    <span>Enable automatic relay timer: </span>
-                    <input id="timerEnableInput" type="checkbox">
+                    <span>Select operation mode: </span>
+                    <select id="operationModeInput">
+                        <option value="0">Disabled</option>
+                        <option value="1">Manual</option>
+                        <option value="2">Schedule</option>
+                        <option value="3">Countdown timer</option>
+                    </select>
                 </div>
                 </div>
             </form>
@@ -89,6 +94,9 @@
                     </span>
                 </div>
             </div>
+        </div>
+        <div id="countdownTimerDiv">
+            
         </div>
         <div id="saveConfigBtnDiv">
             <button id="saveConfigBtn">Save settings</button>
