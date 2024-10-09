@@ -4,12 +4,13 @@ document.addEventListener("DOMContentLoaded", function() {
     /*
     websocket configuration
     */
-    let port = window.location.port;
-    let hostname = window.location.hostname;
+    // let port = window.location.port;
+    // let hostname = window.location.hostname;
     // let port = 7778;
     // let hostname = "192.168.57.70";
     // let hostname = "192.168.5.70";
-    // let hostname = "192.168.4.1";
+    let hostname = "192.168.4.1";
+    let port = 7777;
 
     /*
     DOM elements
@@ -30,8 +31,8 @@ document.addEventListener("DOMContentLoaded", function() {
         const saveTimeBtn = document.getElementById("saveTimeBtn");
     // status LED mode input
     const ledModeInput = document.getElementById("ledModeInput");
-    // automatic timer enable input
-    const timerEnableInput = document.getElementById("timerEnableInput");
+    // operation mode selector input
+    const operationModeInput = document.getElementById("operationModeInput");
     // manual relay state input div, which is only shown when automatic timer is disabled.
     const manualRelayDiv = document.getElementById("manualRelayDiv");
         // manual relay state input
@@ -47,6 +48,11 @@ document.addEventListener("DOMContentLoaded", function() {
         let timeSlotsStartTimes = document.querySelectorAll(".timeSlotStartTime"); 
         let timeSlotsEndTimes = document.querySelectorAll(".timeSlotEndTime");
         let timeSlotsDurations = document.querySelectorAll(".timeSlotDuration");
+    // countdown timer div
+    const countdownTimerDiv = document.getElementById("countdownTimerDiv");
+        // countdown duration input
+        const countdownDurationInput = document.getElementById("countdownDurationInput");
+        const countdownStartStopButton = document.getElementById("startStopCountdownButton");
     // save config button
     const saveConfigBtn = document.getElementById("saveConfigBtn");
 
@@ -96,10 +102,11 @@ document.addEventListener("DOMContentLoaded", function() {
     });
 
     // change eventListener for timerEnableInput
-    timerEnableInput.addEventListener("change", () => {
+    operationModeInput.addEventListener("change", () => {
         // set visible div when timerEnableInput is changed
-        updateTimerEnableDivDisplay();
-        config.timerEnabledSetting = timerEnableInput.checked;
+        console.log(`operation mode ${operationModeInput.value}`);
+        updateOperationModeDivDisplay();
+        config.operationModeSetting = operationModeInput.value;
     });
 
     // change eventListener for manualRelayInput
@@ -188,6 +195,15 @@ document.addEventListener("DOMContentLoaded", function() {
         });
     }
     
+    countdownDurationInput.addEventListener('change', () => {
+        config.countdownDurationSetting = countdownDurationInput.value;
+        console.log(config.countdownDurationSetting);
+    });
+
+    countdownStartStopButton.addEventListener('click', () => {
+
+    });
+
     /*
     variables for configuration and data
     */
@@ -204,7 +220,7 @@ document.addEventListener("DOMContentLoaded", function() {
         name: "",
         ntpEnabledSetting: false, 
         gmtOffsetSetting: 0,
-        timerEnabledSetting: false,
+        operationModeSetting: 0,
         ledSetting: 0,
         timeSlots: [
             {   
@@ -213,7 +229,8 @@ document.addEventListener("DOMContentLoaded", function() {
                 onStartTime: new Date(2024, 1, 1, 0, 0, 0),
                 onEndTime: new Date(2024, 1, 1, 1, 0, 0),
             },
-        ]
+        ],
+        countdownDurationSetting: 0,
     };
 
     
@@ -294,10 +311,10 @@ document.addEventListener("DOMContentLoaded", function() {
         updateNtpEnableDivDisplay();
         // update status LED value
         ledModeInput.value = config["ledSetting"];
-        // update timer enabled value
-        timerEnableInput.checked = config["timerEnabledSetting"];
+        // update operation mode setting
+        operationModeInput.value = config["operationModeSetting"];
         // set visible div based on timer enabled value
-        updateTimerEnableDivDisplay();
+        updateOperationModeDivDisplay();
         manualRelayInput.checked = config["relayManualSetting"];
         // refresh all timeslots
         // remove all timeslots
@@ -339,6 +356,8 @@ document.addEventListener("DOMContentLoaded", function() {
         }
         // set callbacks for all timeslots
         setTimeSlotsCallbacks();
+        // get countdown duration value 
+
     }
 
     /**
@@ -419,13 +438,21 @@ document.addEventListener("DOMContentLoaded", function() {
      * If timerEnableInput is enabled, display the div of timeslots.
      * Else if disabled, display the manual relay div.
      */
-    function updateTimerEnableDivDisplay() {
-        if (timerEnableInput.checked) {
-            manualRelayDiv.style.display = "none";
-            timeSlotsRelayDiv.style.display = "block";
-        } else {
-            manualRelayDiv.style.display = "block";
-            timeSlotsRelayDiv.style.display = "none";
+    function updateOperationModeDivDisplay() {
+        manualRelayDiv.style.display = "none";
+        timeSlotsRelayDiv.style.display = "none";
+        countdownTimerDiv.style.display = "none";
+        switch (operationModeInput.value) {
+            case '1':
+                manualRelayDiv.style.display = "block";
+                break;
+            case '2':
+                timeSlotsRelayDiv.style.display = "block";
+                break;
+            case '3':
+                countdownTimerDiv.style.display = "block";
+                break;
+            default:
         }
     }
 
@@ -438,5 +465,5 @@ document.addEventListener("DOMContentLoaded", function() {
     initWS();
     // update all visible divs on page load
     updateNtpEnableDivDisplay();
-    updateTimerEnableDivDisplay();
+    updateOperationModeDivDisplay();
 });
