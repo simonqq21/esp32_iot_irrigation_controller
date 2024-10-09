@@ -77,12 +77,13 @@ export function receiveData(event, callbacks) {
 /**
  * Save data to the ESP32. 
  * @param {WebSocket} ws - websocket instance
+ * @param {String} cmd - command string
  * @param {String} typeOfData - type of data to save.
  * @param {Object} payload - payload of data to save.
  */
-function saveData(ws, typeOfData, payload) {
+function sendData(ws, cmd, typeOfData, payload) {
     let msg = {};
-    msg["cmd"] = "save";
+    msg["cmd"] = cmd;
     msg["type"] = typeOfData;
     msg["payload"] = payload;
     console.log(JSON.stringify(msg));
@@ -100,7 +101,7 @@ function saveData(ws, typeOfData, payload) {
  * @param {Number} payload.port - port number of the ESP32.
  */
 export function saveConnection(ws, payload) {
-    saveData(ws, "connection", payload);
+    sendData(ws, "save", "connection", payload);
 }
 
 /**
@@ -111,7 +112,7 @@ export function saveConnection(ws, payload) {
  * @param {Boolean} payload.relay_state - manual relay state
  */
 export function saveRelayState(ws, payload) {
-    saveData(ws, "relay_state", payload);
+    sendData(ws, "save", "relay_state", payload);
 }
 
 /**
@@ -122,7 +123,7 @@ export function saveRelayState(ws, payload) {
  * @param {String} payload.datetime - system date and time in ISO format
  */
 export function saveDateTime(ws, payload) {
-    saveData(ws, "datetime", payload);
+    sendData(ws, "save", "datetime", payload);
 }
 
 /**
@@ -142,5 +143,9 @@ export function saveDateTime(ws, payload) {
  * @param {String} payload.timeSlots[].onEndTime - end time of each timeslot in ISO format
  */
 export function saveConfig(ws, payload) {
-    saveData(ws, "config", payload);
+    sendData(ws, "save", "config", payload);
+}
+
+export function switchRelayState(ws, payload) {
+    sendData(ws, "switch", "relay_state", payload);
 }

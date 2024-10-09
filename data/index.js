@@ -112,12 +112,8 @@ document.addEventListener("DOMContentLoaded", function() {
     // change eventListener for manualRelayInput
     manualRelayInput.addEventListener("change", () => {
         config.relayManualSetting = manualRelayInput.checked;
-    });
-
-    // click eventListener for saveConfigBtn
-    saveConfigBtn.addEventListener("click", () => {
-        wsMod.saveConfig(ws, config);
-        console.log("save config");
+        curRelayState.relay_state = manualRelayInput.checked;
+        wsMod.switchRelayState(ws, curRelayState);
     });
 
     // Set the callbacks for the input elements inside each timeslot.
@@ -197,12 +193,21 @@ document.addEventListener("DOMContentLoaded", function() {
     
     countdownDurationInput.addEventListener('change', () => {
         config.countdownDurationSetting = countdownDurationInput.value;
-        console.log(config.countdownDurationSetting);
     });
 
     countdownStartStopButton.addEventListener('click', () => {
-
+        let countdowntimercmd = structuredClone(curRelayState);
+        countdowntimercmd.relay_state = !countdowntimercmd.relay_state;
+        wsMod.switchRelayState(ws, countdowntimercmd);
     });
+
+    // click eventListener for saveConfigBtn
+    saveConfigBtn.addEventListener("click", () => {
+        wsMod.saveConfig(ws, config);
+        console.log("save config");
+    });
+
+
 
     /*
     variables for configuration and data
@@ -214,7 +219,7 @@ document.addEventListener("DOMContentLoaded", function() {
         datetime: new Date(Date.UTC(2024,1,1,0,0,0)).toISOString(),
     };
     // current relay state 
-    let curRelayStateVal = false;
+    let curRelayState = {relay_state: false};
     // EEPROM configuration
     let config = {
         name: "",
@@ -279,20 +284,23 @@ document.addEventListener("DOMContentLoaded", function() {
     }
 
     /**
-     * Callback function to update current relay state display
+     * Callback function to update current relay state display and update the text of the start/stop countdown timer button
      */
     function updateDisplayedRelayState(payload) {
-        console.log(JSON.stringify(payload));
+        // console.log(JSON.stringify(payload));
+        curRelayState.relay_state = payload["relay_state"];
         if (payload["relay_state"]) {
             relayStatusTextOutput.textContent = "On";
             relayStatusIndicatorOutput.classList.add("on");
             relayStatusIndicatorOutput.classList.remove("off");
+            countdownStartStopButton.textContent = "Stop";
         }
         else {
             relayStatusTextOutput.textContent = "Off";
             relayStatusIndicatorOutput.classList.add("off");
             relayStatusIndicatorOutput.classList.remove("on");
-        }
+            countdownStartStopButton.textContent = "Start";
+        } 
     }
 
     /**
@@ -357,7 +365,7 @@ document.addEventListener("DOMContentLoaded", function() {
         // set callbacks for all timeslots
         setTimeSlotsCallbacks();
         // get countdown duration value 
-
+        countdownDurationInput.value = config["countdownDurationSetting"];
     }
 
     /**
