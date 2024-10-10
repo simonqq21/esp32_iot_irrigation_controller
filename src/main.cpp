@@ -8,12 +8,9 @@
 
 /*
 TODO:
-add a third mode: timer mode.
-  The relay is manually closed, and stays closed until either manually opened 
-  or the set timer runs out. 
+add multiple relays
 make the UI more user friendly, such as greying out the save button until a 
   setting has been changed.
-Add a one click button to turn the relay on and off in one click.
 */
 
 /*
