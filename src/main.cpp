@@ -94,7 +94,7 @@ void checkRelayIfOn() {
     relay.set(newRelayState);
     // Serial.printf("after set %d, %d",newRelayState, relay.readState());
     // update relay state to client
-    wsMod.sendCurrentRelayState(newRelayState);
+    wsMod.sendCurrentRelayStates(newRelayState);
   }
 }
 

@@ -3,7 +3,7 @@
 AsyncWebServer* WebserverModule::_server;
 AsyncWebSocket WebserverModule::_ws = AsyncWebSocket("/ws");
 JsonDocument WebserverModule::_jsonDoc;
-char WebserverModule::_strData[1500];
+char WebserverModule::_strData[1250];
 EEPROMConfig* WebserverModule::_eC;
 RTCNTP* WebserverModule::_rtcntp;
 IPAddress  WebserverModule::_apIP;
@@ -213,23 +213,11 @@ void WebserverModule::handleWebSocketMessage(void *arg, uint8_t *data, size_t le
         DeserializationError error = deserializeJson(_jsonDoc, (char*)data); 
         String cmd = _jsonDoc[CMD_KEY];
         String type = _jsonDoc[TYPE_KEY];
-        // String payload = _jsonDoc[PAYLOAD_KEY]["ssid"];
         JsonDocument payloadJSON = _jsonDoc[PAYLOAD_KEY];
 
         Serial.printf("cmd=%s\n", cmd);
         Serial.printf("type=%s\n", type);
-        // Serial.printf("payload=%s\n", payloadJSON["ssid"]);
-        // String ssid = payloadJSON["ssid"];
-        // Serial.printf("ssid=%s\n", ssid);
-        // Serial.printf("payload2=%s\n", payload2);
-        // char output[100];
-        // serializeJson(_jsonDoc, output);
-        // Serial.print(output);
-        // JsonDocument pj;
-        // deserializeJson(pj, _jsonDoc[PAYLOAD_KEY]);
         // JsonObject payload = pj.as<JsonObject>();
-        // Serial.printf("%s\n", pj["ssid"]);
-        
         if (cmd == REQUEST_CMD) {
             handleRequest(type, payloadJSON);
         }
@@ -274,12 +262,15 @@ void WebserverModule::sendConnection(JsonDocument inputPayloadJSON) {
     _ws.textAll(_strData);
 }
 
-void WebserverModule::sendCurrentRelayState(bool curRelayState) {
+void WebserverModule::sendCurrentRelayStates(bool curRelayStates[]) {
     _jsonDoc.clear();
     _jsonDoc[CMD_KEY] = LOAD_CMD;
     _jsonDoc[TYPE_KEY] = RELAY_STATES_TYPE;
     JsonObject payloadJSON = _jsonDoc[PAYLOAD_KEY].to<JsonObject>();
-    payloadJSON["relay_state"] = curRelayState;
+    JsonArray relayStatesArr = payloadJSON["relay_states"].to<JsonArray>();
+    for (int i=0;i<NUMBER_OF_RELAYS;i++) {
+        relayStatesArr.add(curRelayStates[i]);
+    }
     serializeJson(_jsonDoc, _strData);
     Serial.printf("serialized JSON = %s\n", _strData);
     _ws.textAll(_strData);
@@ -297,7 +288,7 @@ void WebserverModule::sendDateTime(JsonDocument inputPayloadJSON) {
     _ws.textAll(_strData);
 }
 
-void WebserverModule::sendConfig(JsonDocument inputPayloadJSON) {
+void WebserverModule::sendMainConfig(JsonDocument inputPayloadJSON) {
     _jsonDoc.clear();
     _jsonDoc[CMD_KEY] = LOAD_CMD;
     _jsonDoc[TYPE_KEY] = MAIN_CONFIG_TYPE;
@@ -336,7 +327,7 @@ void WebserverModule::handleRequest(String type, JsonDocument payloadJSON) {
         }
     }
     else if (type == RELAY_STATES_TYPE) {
-        sendCurrentRelayState(_relay->readState());
+        sendCurrentRelayStates(_relay->readState());
         if (_sendRelayStateFunc != NULL) {
             _sendRelayStateFunc();
         }
@@ -348,7 +339,7 @@ void WebserverModule::handleRequest(String type, JsonDocument payloadJSON) {
         }  
     }
     else if (type == MAIN_CONFIG_TYPE) {
-        sendConfig(payloadJSON);
+        sendMainConfig(payloadJSON);
         if (_sendConfigFunc != NULL) {
             _sendConfigFunc();           
         }
@@ -390,11 +381,11 @@ void WebserverModule::receiveConnection(JsonDocument inputPayloadJSON) {
     ESP.restart();
 }
 
-void WebserverModule::receiveRelayState(JsonDocument inputPayloadJSON) {
-    _eC->setRelayManualSetting(inputPayloadJSON["relay_state"]);
-    _eC->saveMainConfig();
-    Serial.println("saved relay manual state");
-}
+// void WebserverModule::receiveRelayState(JsonDocument inputPayloadJSON) {
+//     _eC->setRelayManualSetting(inputPayloadJSON["relay_state"]);
+//     _eC->saveMainConfig();
+//     Serial.println("saved relay manual state");
+// }
 
 void WebserverModule::receiveDateTime(JsonDocument inputPayloadJSON) {
     String dtisostr = inputPayloadJSON["datetime"];
@@ -402,7 +393,7 @@ void WebserverModule::receiveDateTime(JsonDocument inputPayloadJSON) {
     Serial.println("saved datetime");
 }
 
-void WebserverModule::receiveConfig(JsonDocument inputPayloadJSON) {
+void WebserverModule::receiveMainConfig(JsonDocument inputPayloadJSON) {
     _eC->setName(inputPayloadJSON["name"]);
     _eC->setNTPEnabled(inputPayloadJSON["ntpEnabledSetting"]);
     _eC->setGMTOffset(inputPayloadJSON["gmtOffsetSetting"]);
@@ -449,12 +440,12 @@ void WebserverModule::receiveData(String cmd, String type, JsonDocument payloadJ
                 _receiveConnectionFunc();
             }
         }
-        else if (type == RELAY_STATES_TYPE) {
-            receiveRelayState(payloadJSON);
-            if (_receiveRelayStateFunc != NULL) {
-                _receiveRelayStateFunc();
-            }
-        }
+        // else if (type == RELAY_STATES_TYPE) {
+        //     receiveRelayState(payloadJSON);
+        //     if (_receiveRelayStateFunc != NULL) {
+        //         _receiveRelayStateFunc();
+        //     }
+        // }
         else if (type == DATETIME_TYPE) {
             receiveDateTime(payloadJSON);
             if (_receiveDateTimeFunc != NULL) {
@@ -462,7 +453,7 @@ void WebserverModule::receiveData(String cmd, String type, JsonDocument payloadJ
             }  
         }
         else if (type == MAIN_CONFIG_TYPE) {
-            receiveConfig(payloadJSON);
+            receiveMainConfig(payloadJSON);
             if (_receiveConfigFunc != NULL) {
                 _receiveConfigFunc();
             }

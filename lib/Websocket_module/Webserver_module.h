@@ -71,7 +71,7 @@ from ESP32 to browser
     },
 }
 
-- ESP32 send relay state to browser
+- ESP32 send relay states to browser
 {
     cmd: "load",
     type: "relay_states",
@@ -323,9 +323,10 @@ class WebserverModule {
 
         // methods to send ESP32 state to client browser
         static void sendConnection(JsonDocument payloadJSON=JsonDocument());
-        static void sendCurrentRelayState(bool curRelayState);
+        static void sendCurrentRelayStates(bool curRelayStates[]);
         static void sendDateTime(JsonDocument inputPayloadJSON=JsonDocument());
-        static void sendConfig(JsonDocument inputPayloadJSON=JsonDocument());
+        static void sendMainConfig(JsonDocument inputPayloadJSON=JsonDocument());
+        static void sendRelayConfig(int rIndex, JsonDocument inputPayloadJSON=JsonDocument());
         // method to handle requests from the client browser 
         static void handleRequest(String type, JsonDocument payloadJSON); 
         // set callbacks for sending methods
@@ -336,9 +337,10 @@ class WebserverModule {
 
         // methods to receive and set new state from client browser 
         static void receiveConnection(JsonDocument inputPayloadJSON);
-        static void receiveRelayState(JsonDocument inputPayloadJSON);
+        // static void receiveRelayState(JsonDocument inputPayloadJSON);
         static void receiveDateTime(JsonDocument inputPayloadJSON);
-        static void receiveConfig(JsonDocument inputPayloadJSON);
+        static void receiveMainConfig(JsonDocument inputPayloadJSON);
+        static void receiveRelayConfigs(JsonDocument inputPayloadJSON);
         static void switchRelayState(JsonDocument inputPayloadJSON);
         // method to handle receiving different kinds of data from the client browser 
         static void receiveData(String cmd, String type, JsonDocument payloadJSON);
@@ -352,7 +354,7 @@ class WebserverModule {
         static AsyncWebServer* _server;
         static AsyncWebSocket _ws;
         static JsonDocument _jsonDoc;
-        static char _strData[1500];
+        static char _strData[1250];
         static EEPROMConfig* _eC;
         static RTCNTP* _rtcntp;
         static IPAddress _apIP;
