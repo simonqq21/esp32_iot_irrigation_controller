@@ -215,12 +215,16 @@ void EEPROMConfig::print() {
     Serial.printf("Device name = %s\n", this->getName());
     Serial.printf("ntpEnabledSetting=%d\n", this->getNTPEnabled());
     Serial.printf("gmtOffsetSetting=%d\n", this->getGMTOffset());
-    Serial.printf("operationModeSetting=%d\n", this->getOperationMode());
-    Serial.printf("ledSetting=%d\n", this->getLEDSetting());
-    Serial.printf("relayManualSetting=%d\n", this->getRelayManualSetting());
-    Serial.println();
-    for (int i=0;i<NUMBER_OF_TIMESLOTS;i++) {
-        _timeslots[i]->print();
+    for (int i=0;i<NUMBER_OF_RELAYS;i++) {
+        Serial.printf("index=%d\n", i);
+        Serial.printf("ledSetting=%d\n", this->getLEDSetting(i));
+        Serial.printf("operationModeSetting=%d\n", this->getOperationMode(i));
+        Serial.printf("relayManualSetting=%d\n", this->getRelayManualSetting(i));
+        for (int j=0;j<NUMBER_OF_TIMESLOTS;j++) {
+            _timeslots[i][j]->print();
+            Serial.println();
+        }
+        Serial.printf("countdownDurationSetting=%u\n", this->getCountdownDuration(i));
         Serial.println();
     }
     Serial.println();
@@ -231,16 +235,31 @@ void EEPROMConfig::begin() {
     // compute starting addresses for connection config and main config structs
     _connectionConfigAddr = _eepromAddr;
     _mainConfigAddr = _connectionConfigAddr + sizeof(connectionConfig);
-    for (int i=0;i<NUMBER_OF_TIMESLOTS;i++) {
-        _timeslots[i] = new TimeSlot(&_eC._mainConfig.timeSlots[i], i);
+    unsigned long lastAddrPtr = _mainConfigAddr;
+    for (int i=0;i<NUMBER_OF_RELAYS;i++) {
+        if (i==0) {
+            _relayConfigAddrs[i] = lastAddrPtr + sizeof(mainConfig);
+        }
+        else {
+            _relayConfigAddrs[i] = lastAddrPtr + sizeof(relayConfig);
+        }
+        lastAddrPtr = _relayConfigAddrs[i];
+    }
+
+    for (int i=0;i<NUMBER_OF_RELAYS;i++) {
+        for (int j=0;j<NUMBER_OF_TIMESLOTS;j++) {
+            _timeslots[i][j] = new TimeSlot(&_eC._relayConfigs[i].timeSlots[j], j);
+        }
     }
 }
 
 void EEPROMConfig::load() {
     EEPROM.get(_eepromAddr, _eC);
     Serial.println("loaded _eC");
-    for (int i=0;i<NUMBER_OF_TIMESLOTS;i++) {
-        _timeslots[i] = new TimeSlot(&_eC._mainConfig.timeSlots[i], i);
+    for (int i=0;i<NUMBER_OF_RELAYS;i++) {
+        for (int j=0;j<NUMBER_OF_TIMESLOTS;j++) {
+            _timeslots[i][j] = new TimeSlot(&_eC._relayConfigs[i].timeSlots[j], j);
+        }
     }
     Serial.println("Initialized TimeSlots");
 }
@@ -248,8 +267,10 @@ void EEPROMConfig::load() {
 void EEPROMConfig::load(DateTime now) {
     EEPROM.get(_eepromAddr, _eC);
     Serial.println("loaded _eC");
-    for (int i=0;i<NUMBER_OF_TIMESLOTS;i++) {
-        _timeslots[i] = new TimeSlot(&_eC._mainConfig.timeSlots[i], i, now);
+    for (int i=0;i<NUMBER_OF_RELAYS;i++) {
+        for (int j=0;j<NUMBER_OF_TIMESLOTS;j++) {
+            _timeslots[i][j] = new TimeSlot(&_eC._relayConfigs[i].timeSlots[j], j, now);
+        }
     }
     Serial.println("Initialized TimeSlots");
 }
@@ -257,6 +278,9 @@ void EEPROMConfig::load(DateTime now) {
 void EEPROMConfig::save() {
     this->saveConnectionConfig();
     this->saveMainConfig();
+    for (int i=0;i<NUMBER_OF_RELAYS;i++) {
+        this->saveRelayConfig(i);
+    }
 }
 
 void EEPROMConfig::saveConnectionConfig() {
@@ -266,6 +290,11 @@ void EEPROMConfig::saveConnectionConfig() {
 
 void EEPROMConfig::saveMainConfig() {
     EEPROM.put(_mainConfigAddr, _eC._mainConfig);
+    EEPROM.commit();
+}
+
+void EEPROMConfig::saveRelayConfig(int rIndex) {
+    EEPROM.put(_relayConfigAddrs[rIndex], _eC._relayConfigs[rIndex]);
     EEPROM.commit();
 }
 
@@ -326,90 +355,82 @@ void EEPROMConfig::setGMTOffset(short gmtOffset) {
     _eC._mainConfig.gmtOffsetSetting = gmtOffset;
 }
 
-// bool EEPROMConfig::getTimerEnabled() {
-//     return _eC._mainConfig.timerEnabledSetting;
-// }
-
-// void EEPROMConfig::setTimerEnabled(bool timerEnabled) {
-//     _eC._mainConfig.timerEnabledSetting = timerEnabled;
-// }
-
-int EEPROMConfig::getOperationMode() {
-    return _eC._mainConfig.operationModeSetting;
+short EEPROMConfig::getLEDSetting(int rIndex) {
+    return _eC._relayConfigs[rIndex].ledSetting;
 }
 
-void EEPROMConfig::setOperationMode(int operationMode){
-    _eC._mainConfig.operationModeSetting = operationMode;
+void EEPROMConfig::setLEDSetting(int rIndex, short ledSetting) {
+    _eC._relayConfigs[rIndex].ledSetting = ledSetting;
 }
 
-short EEPROMConfig::getLEDSetting() {
-    return _eC._mainConfig.ledSetting;
+int EEPROMConfig::getOperationMode(int rIndex) {
+    return _eC._relayConfigs[rIndex].operationModeSetting;
 }
 
-void EEPROMConfig::setLEDSetting(short ledSetting) {
-    _eC._mainConfig.ledSetting = ledSetting;
+void EEPROMConfig::setOperationMode(int rIndex, int operationMode){
+    _eC._relayConfigs[rIndex].operationModeSetting = operationMode;
 }
 
-bool EEPROMConfig::getRelayManualSetting() {
-    return _eC._mainConfig.relayManualSetting;
+bool EEPROMConfig::getRelayManualSetting(int rIndex) {
+    return _eC._relayConfigs[rIndex].relayManualSetting;
 }
 
-void EEPROMConfig::setRelayManualSetting(bool relayManualSetting) {
-    _eC._mainConfig.relayManualSetting = relayManualSetting;
+void EEPROMConfig::setRelayManualSetting(int rIndex, bool relayManualSetting) {
+    _eC._relayConfigs[rIndex].relayManualSetting = relayManualSetting;
 }
 
-TimeSlot* EEPROMConfig::getTimeSlot(int index) {
-    return _timeslots[index];
+TimeSlot* EEPROMConfig::getTimeSlot(int rIndex, int index) {
+    return _timeslots[rIndex][index];
 }
 
-bool EEPROMConfig::checkIfAnyTimeSlotOn(DateTime now, bool interrupt) {
+bool EEPROMConfig::checkIfAnyTimeSlotOn(int rIndex, DateTime now, bool interrupt) {
     Serial.println("checking timeslots");
     for (int i=0;i<NUMBER_OF_TIMESLOTS;i++) {
         // Serial.printf("checkIfAnyTimeSlotOn timeslot index %d returns\n", i);
-        if (_timeslots[i]->checkIfOn(now, interrupt)) {
+        if (_timeslots[rIndex][i]->checkIfOn(now, interrupt)) {
             return true;
         }
     }
     return false;
 }
 
-unsigned long EEPROMConfig::getCountdownDuration() {
-    return _eC._mainConfig.countdownDurationSetting;
+unsigned long EEPROMConfig::getCountdownDuration(int rIndex) {
+    return _eC._relayConfigs[rIndex].countdownDurationSetting;
 }
-void EEPROMConfig::setCountdownDuration(unsigned long countdownDuration) {
-    _eC._mainConfig.countdownDurationSetting = countdownDuration;
+void EEPROMConfig::setCountdownDuration(int rIndex, unsigned long countdownDuration) {
+    _eC._relayConfigs[rIndex].countdownDurationSetting = countdownDuration;
 }
 
-void EEPROMConfig::startCountdownTimer() {
+void EEPROMConfig::startCountdownTimer(int rIndex) {
     Serial.println("countdown timer started");
-    countdownTimerVars.timeRemaining = _eC._mainConfig.countdownDurationSetting;
-    countdownTimerVars.lastTimeChecked = millis();
-    countdownTimerVars.pause = false;
+    countdownTimerVars[rIndex].timeRemaining = _eC._relayConfigs[rIndex].countdownDurationSetting;
+    countdownTimerVars[rIndex].lastTimeChecked = millis();
+    countdownTimerVars[rIndex].pause = false;
 }
 
-void EEPROMConfig::stopCountdownTimer() {
+void EEPROMConfig::stopCountdownTimer(int rIndex) {
     Serial.println("countdown timer stopped");
-    countdownTimerVars.timeRemaining = -1;
-    countdownTimerVars.pause = true;
+    countdownTimerVars[rIndex].timeRemaining = -1;
+    countdownTimerVars[rIndex].pause = true;
 }
 
-bool EEPROMConfig::checkCountdownTimer(unsigned long min_ms) {
-    if (countdownTimerVars.timeRemaining > min_ms && !countdownTimerVars.pause) {
-        unsigned long timeDifference = millis() - countdownTimerVars.lastTimeChecked;
-        countdownTimerVars.timeRemaining -= timeDifference;
-        countdownTimerVars.lastTimeChecked = millis();
-        Serial.printf("timeRemaining=%d\n", countdownTimerVars.timeRemaining);
-        return (countdownTimerVars.timeRemaining > 0)? 1:0;
+bool EEPROMConfig::checkCountdownTimer(int rIndex, unsigned long min_ms) {
+    if (countdownTimerVars[rIndex].timeRemaining > min_ms && !countdownTimerVars[rIndex].pause) {
+        unsigned long timeDifference = millis() - countdownTimerVars[rIndex].lastTimeChecked;
+        countdownTimerVars[rIndex].timeRemaining -= timeDifference;
+        countdownTimerVars[rIndex].lastTimeChecked = millis();
+        Serial.printf("timeRemaining=%d\n", countdownTimerVars[rIndex].timeRemaining);
+        return (countdownTimerVars[rIndex].timeRemaining > 0)? 1:0;
     }
     else {
         return 0;
     }
 }
 
-void EEPROMConfig::pauseCountdownTimer() {
-    countdownTimerVars.pause = true;
+void EEPROMConfig::pauseCountdownTimer(int rIndex) {
+    countdownTimerVars[rIndex].pause = true;
 }
 
-void EEPROMConfig::unpauseCountdownTimer() {
-    countdownTimerVars.pause = false;
+void EEPROMConfig::unpauseCountdownTimer(int rIndex) {
+    countdownTimerVars[rIndex].pause = false;
 }

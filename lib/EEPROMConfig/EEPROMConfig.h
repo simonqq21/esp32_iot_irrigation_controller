@@ -10,6 +10,9 @@
 #define SSID_LENGTH 32
 #define PASS_LENGTH 32 
 #define NAME_LENGTH 32 
+#define NUMBER_OF_RELAYS 3
+
+// structs
 
 struct timeSlot {
     unsigned short index;
@@ -36,9 +39,12 @@ struct mainConfig {
     char deviceName[NAME_LENGTH];
     bool ntpEnabledSetting;
     short gmtOffsetSetting;
-    // bool timerEnabledSetting;
-    int operationModeSetting; // 0 for disabled, 1 for manual, 2 for daily timer, and 3 for countdown timer
+};
+
+struct relayConfig {
+    int index;
     short ledSetting;
+    int operationModeSetting; // 0 for disabled, 1 for manual, 2 for daily timer, and 3 for countdown timer
     bool relayManualSetting;
     timeSlot timeSlots[NUMBER_OF_TIMESLOTS];
     long countdownDurationSetting;
@@ -47,7 +53,10 @@ struct mainConfig {
 struct eepromConfig {
     connectionConfig _connectionConfig;
     mainConfig _mainConfig;
+    relayConfig _relayConfigs[NUMBER_OF_RELAYS];
 };
+
+// classes
 
 class TimeSlot {
     public:
@@ -94,6 +103,9 @@ class EEPROMConfig {
         void save();
         void saveConnectionConfig();
         void saveMainConfig();
+        void saveRelayConfig(int rIndex);
+
+        // connection config methods
         int getIPAddressIndex();
         void setIPAddressIndex(int ipIndex=2);
         int getPort();
@@ -103,6 +115,7 @@ class EEPROMConfig {
         String getPassword();
         void setPassword(String password);
 
+        // main config methods
         String getName();
         void setName(String deviceName);
         bool getNTPEnabled();
@@ -110,30 +123,28 @@ class EEPROMConfig {
         short getGMTOffset();
         void setGMTOffset(short gmtOffset);
         
-        int getOperationMode();
-        void setOperationMode(int operationMode);
-
-        short getLEDSetting();
-        void setLEDSetting(short ledSetting);
-        bool getRelayManualSetting();
-        void setRelayManualSetting(bool relayManualSetting);
-        TimeSlot* getTimeSlot(int index);
-        bool checkIfAnyTimeSlotOn(DateTime now, bool interrupt=false);
-
-        unsigned long getCountdownDuration();
-        void setCountdownDuration(unsigned long countdownDuration);
-
-        void startCountdownTimer();
-        void stopCountdownTimer();
-        bool checkCountdownTimer(unsigned long min_ms = 1000);
-        void pauseCountdownTimer();
-        void unpauseCountdownTimer();
+        // relay config methods
+        short getLEDSetting(int rIndex);
+        void setLEDSetting(int rIndex, short ledSetting);
+        int getOperationMode(int rIndex);
+        void setOperationMode(int rIndex, int operationMode);
+        bool getRelayManualSetting(int rIndex);
+        void setRelayManualSetting(int rIndex, bool relayManualSetting);
+        TimeSlot* getTimeSlot(int rIndex, int tsIndex);
+        bool checkIfAnyTimeSlotOn(int rIndex, DateTime now, bool interrupt=false);
+        unsigned long getCountdownDuration(int rIndex);
+        void setCountdownDuration(int rIndex, unsigned long countdownDuration);
+        void startCountdownTimer(int rIndex);
+        void stopCountdownTimer(int rIndex);
+        bool checkCountdownTimer(int rIndex, unsigned long min_ms = 100);
+        void pauseCountdownTimer(int rIndex);
+        void unpauseCountdownTimer(int rIndex);
 
     private:
-        unsigned int _eepromAddr, _connectionConfigAddr, _mainConfigAddr;
+        unsigned int _eepromAddr, _connectionConfigAddr, _mainConfigAddr, _relayConfigAddrs[NUMBER_OF_RELAYS];
         eepromConfig _eC;
-        TimeSlot* _timeslots[NUMBER_OF_TIMESLOTS];
-        countdownTimer countdownTimerVars;
+        TimeSlot* _timeslots[NUMBER_OF_RELAYS][NUMBER_OF_TIMESLOTS];
+        countdownTimer countdownTimerVars[NUMBER_OF_RELAYS];
 };
 
 #endif

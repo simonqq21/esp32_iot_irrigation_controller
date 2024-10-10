@@ -3,7 +3,7 @@
 AsyncWebServer* WebserverModule::_server;
 AsyncWebSocket WebserverModule::_ws = AsyncWebSocket("/ws");
 JsonDocument WebserverModule::_jsonDoc;
-char WebserverModule::_strData[1250];
+char WebserverModule::_strData[1500];
 EEPROMConfig* WebserverModule::_eC;
 RTCNTP* WebserverModule::_rtcntp;
 IPAddress  WebserverModule::_apIP;
@@ -277,7 +277,7 @@ void WebserverModule::sendConnection(JsonDocument inputPayloadJSON) {
 void WebserverModule::sendCurrentRelayState(bool curRelayState) {
     _jsonDoc.clear();
     _jsonDoc[CMD_KEY] = LOAD_CMD;
-    _jsonDoc[TYPE_KEY] = RELAY_STATE_TYPE;
+    _jsonDoc[TYPE_KEY] = RELAY_STATES_TYPE;
     JsonObject payloadJSON = _jsonDoc[PAYLOAD_KEY].to<JsonObject>();
     payloadJSON["relay_state"] = curRelayState;
     serializeJson(_jsonDoc, _strData);
@@ -300,7 +300,7 @@ void WebserverModule::sendDateTime(JsonDocument inputPayloadJSON) {
 void WebserverModule::sendConfig(JsonDocument inputPayloadJSON) {
     _jsonDoc.clear();
     _jsonDoc[CMD_KEY] = LOAD_CMD;
-    _jsonDoc[TYPE_KEY] = CONFIG_TYPE;
+    _jsonDoc[TYPE_KEY] = MAIN_CONFIG_TYPE;
     JsonObject payloadJSON = _jsonDoc[PAYLOAD_KEY].to<JsonObject>();
         payloadJSON["name"] = _eC->getName();
         payloadJSON["ntpEnabledSetting"] = _eC->getNTPEnabled();
@@ -335,7 +335,7 @@ void WebserverModule::handleRequest(String type, JsonDocument payloadJSON) {
             _sendConnectionFunc();
         }
     }
-    else if (type == RELAY_STATE_TYPE) {
+    else if (type == RELAY_STATES_TYPE) {
         sendCurrentRelayState(_relay->readState());
         if (_sendRelayStateFunc != NULL) {
             _sendRelayStateFunc();
@@ -347,7 +347,7 @@ void WebserverModule::handleRequest(String type, JsonDocument payloadJSON) {
             _sendDateTimeFunc();
         }  
     }
-    else if (type == CONFIG_TYPE) {
+    else if (type == MAIN_CONFIG_TYPE) {
         sendConfig(payloadJSON);
         if (_sendConfigFunc != NULL) {
             _sendConfigFunc();           
@@ -449,7 +449,7 @@ void WebserverModule::receiveData(String cmd, String type, JsonDocument payloadJ
                 _receiveConnectionFunc();
             }
         }
-        else if (type == RELAY_STATE_TYPE) {
+        else if (type == RELAY_STATES_TYPE) {
             receiveRelayState(payloadJSON);
             if (_receiveRelayStateFunc != NULL) {
                 _receiveRelayStateFunc();
@@ -461,7 +461,7 @@ void WebserverModule::receiveData(String cmd, String type, JsonDocument payloadJ
                 _receiveDateTimeFunc();
             }  
         }
-        else if (type == CONFIG_TYPE) {
+        else if (type == MAIN_CONFIG_TYPE) {
             receiveConfig(payloadJSON);
             if (_receiveConfigFunc != NULL) {
                 _receiveConfigFunc();
@@ -469,7 +469,7 @@ void WebserverModule::receiveData(String cmd, String type, JsonDocument payloadJ
         }
     }
     else if (cmd == SWITCH_CMD) {
-        if (type == RELAY_STATE_TYPE) {
+        if (type == RELAY_STATES_TYPE) {
             switchRelayState(payloadJSON);
             if (_switchRelayStateFunc != NULL) {
                 _switchRelayStateFunc();
