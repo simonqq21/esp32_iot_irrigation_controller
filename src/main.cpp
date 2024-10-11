@@ -6,6 +6,8 @@
 #include "EEPROMConfig.h"
 #include "Webserver_module.h"
 
+#include "esp_websocket_client.h"
+
 /*
 TODO:
 add multiple relays
@@ -16,15 +18,16 @@ make the UI more user friendly, such as greying out the save button until a
 /*
 hardware pins
 */ 
-const int ledPin = 18;
-const int buttonPin = 4;
-const int relayPin = 13;
+const int ledPins[3] = {18};
+const int buttonPins[3] = {4};
+const int relayPins[3] = {13};
 /*
 hardware components
 */
-LED statusLED(ledPin);
-Button button(buttonPin);
-Relay relay(relayPin);
+LED statusLEDs[3];
+Button buttons[3];
+Relay relays[3];
+
 /*
 Major modules
 */
@@ -227,6 +230,11 @@ void setup() {
     Serial.println("An error occured while mounting LittleFS.");
   }
 
+  for (int i=0;i<NUMBER_OF_RELAYS;i++) {
+    statusLEDs[i] = LED(ledPins[i]);
+    buttons[i] = Button(buttonPins[i]);
+    relays[i] = Relay(relayPins[i]);
+  }
   // init status LED
   statusLED.begin();
 
@@ -270,6 +278,8 @@ void setup() {
 
   eC.print();
   rtcntp.printTime();
+
+  // esp_web
 }
 
 void loop() {

@@ -107,8 +107,8 @@ from ESP32 to browser
     payload: {
         relay_config: {
             index: int,
-            operationModeSetting: int,
             ledSetting: int,
+            operationModeSetting: int,
             relayManualSetting: bool,
             timeSlots[]: timeSlot[] {
                 index: int,
@@ -307,7 +307,7 @@ const String RELAY_CONFIGS_TYPE = "relay_configs";
 class WebserverModule {
     public:
         WebserverModule();
-        static void begin(EEPROMConfig* eC, RTCNTP* rtcntp, Relay* relay);
+        static void begin(EEPROMConfig* eC, RTCNTP* rtcntp, Relay relays[3]);
         
         // wifi connection methods
         static void connect();
@@ -358,7 +358,8 @@ class WebserverModule {
         static EEPROMConfig* _eC;
         static RTCNTP* _rtcntp;
         static IPAddress _apIP;
-        static Relay* _relay; 
+        // static Relay* _relays; 
+        static Relay* _relays[NUMBER_OF_RELAYS]; 
 
         static void (*_sendConnectionFunc)();
         static void (*_sendRelayStateFunc)();
