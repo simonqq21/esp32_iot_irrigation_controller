@@ -9,15 +9,19 @@ void Button::begin() {
     pinMode(_pin, INPUT_PULLUP);
 }
 
-void Button::setShortPressFunc(void (*shortPressFunc)()) {
+void Button::setIndex(int index) {
+    _index=index;
+}
+
+void Button::setShortPressFunc(void (*shortPressFunc)(int)) {
     _shortPressFunc = shortPressFunc;
 }
 
-void Button::setLongPressFunc(void (*longPressFunc)()) {
+void Button::setLongPressFunc(void (*longPressFunc)(int)) {
     _longPressFunc = longPressFunc;
 }
 
-void Button::setDoublePressFunc(void (*doubleShortPressFunc)()) {
+void Button::setDoublePressFunc(void (*doubleShortPressFunc)(int)) {
     _doubleShortPressFunc = doubleShortPressFunc;
 }
 
@@ -50,7 +54,7 @@ void Button::loop() {
                     _btnPressed = BUTTON_DOUBLE_SHORT_PRESS;
                     Serial.println("button double short pressed ");
                     if (_doubleShortPressFunc != NULL) {
-                        _doubleShortPressFunc(); // run short press callback
+                        _doubleShortPressFunc(_index); // run short press callback
                     }
                     _buttonPresses = 0;
                     _doublePressTimer = millis();
@@ -65,7 +69,7 @@ void Button::loop() {
         _btnPressed = BUTTON_SHORT_PRESS;
         Serial.println("button short pressed ");
         if (_shortPressFunc != NULL) {
-            _shortPressFunc(); // run short press callback
+            _shortPressFunc(_index); // run short press callback
         }
         _buttonPresses = 0;
         _doublePressTimer = millis();
@@ -76,7 +80,7 @@ void Button::loop() {
         _btnPressed = BUTTON_LONG_PRESS;
         Serial.println("button long pressed ");
         if (_longPressFunc != NULL) {
-            _longPressFunc(); // run long press callback
+            _longPressFunc(_index); // run long press callback
         }
         _btnSurePressed = false;
         _trigBtnState = _btnState;

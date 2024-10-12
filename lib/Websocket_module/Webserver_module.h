@@ -284,8 +284,6 @@ switches relay state in manual mode and starts/stops the countdown timer
 
     */
 
-
-
 // some definitions for JSON msg constants
 const String CMD_KEY = "cmd";
 const String TYPE_KEY = "type";

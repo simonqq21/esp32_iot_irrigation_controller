@@ -11,7 +11,7 @@
 #define PASS_LENGTH 32 
 #define NAME_LENGTH 32 
 #define NUMBER_OF_RELAYS 3
-
+const int MAGIC_NUMBER = 0x88;
 // structs
 
 struct timeSlot {
@@ -54,6 +54,7 @@ struct eepromConfig {
     connectionConfig _connectionConfig;
     mainConfig _mainConfig;
     relayConfig _relayConfigs[NUMBER_OF_RELAYS];
+    int magicNumber;
 };
 
 // classes
@@ -141,7 +142,7 @@ class EEPROMConfig {
         void unpauseCountdownTimer(int rIndex);
 
     private:
-        unsigned int _eepromAddr, _connectionConfigAddr, _mainConfigAddr, _relayConfigAddrs[NUMBER_OF_RELAYS];
+        unsigned int _eepromAddr, _connectionConfigAddr, _mainConfigAddr, _relayConfigAddrs[NUMBER_OF_RELAYS], _magicNumberAddr;
         eepromConfig _eC;
         TimeSlot* _timeslots[NUMBER_OF_RELAYS][NUMBER_OF_TIMESLOTS];
         countdownTimer countdownTimerVars[NUMBER_OF_RELAYS];

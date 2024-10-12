@@ -18,15 +18,15 @@ make the UI more user friendly, such as greying out the save button until a
 /*
 hardware pins
 */ 
-const int ledPins[3] = {18};
-const int buttonPins[3] = {4};
-const int relayPins[3] = {13};
+const int ledPins[NUMBER_OF_RELAYS] = {18,19,5};
+const int buttonPins[NUMBER_OF_RELAYS] = {4,23,15};
+const int relayPins[NUMBER_OF_RELAYS] = {13,12,14};
 /*
 hardware components
 */
-LED statusLEDs[3];
-Button buttons[3];
-Relay relays[3];
+LED statusLEDs[NUMBER_OF_RELAYS] = {LED(ledPins[0]), LED(ledPins[1]), LED(ledPins[2])};
+Button buttons[NUMBER_OF_RELAYS] = {Button(buttonPins[0]), Button(buttonPins[1]), Button(buttonPins[2])};
+Relay relays[NUMBER_OF_RELAYS] = {Relay(relayPins[0]), Relay(relayPins[1]), Relay(relayPins[2])};
 
 /*
 Major modules
@@ -39,8 +39,7 @@ WebserverModule wsMod;
 misc variables
 */
 // check timeslots once a second
-unsigned long lastTimeTimeSlotsChecked;
-int timeSlotCheckInterval = 1000;
+unsigned long lastTimesTimeSlotsChecked[NUMBER_OF_RELAYS];
 // for resetting wifi credentials by long pressing the button
 bool resetWiFi = false;
 bool resetWiFiBlinkLED = false;
@@ -59,99 +58,111 @@ watchdog to reset.
 bool updateNTPFlag = false;
 unsigned long lastTimeUpdateTime;
 // relay state
-bool newRelayState;
+bool newRelayStates[NUMBER_OF_RELAYS];
 
 /*
 function in the loop to control the relay.
 */
-void checkRelayIfOn() {
-  switch (eC.getOperationMode()) {
-    // manual mode
-    case 1:
-      newRelayState = eC.getRelayManualSetting();
-      // Serial.printf("newRelayState=%d\n", newRelayState);
-      break;
-    // if automatic timer is enabled, check all timeslots if any one of them is on
-    // in the current time.
-    case 2:
-      if (millis() - lastTimeTimeSlotsChecked >= timeSlotCheckInterval) {
-        lastTimeTimeSlotsChecked = millis();
-        dtnow = rtcntp.getRTCTime();
-        newRelayState = eC.checkIfAnyTimeSlotOn(dtnow);
-      }
-      break;
-    // countdown timer mode
-    case 3:
-      if (millis() - lastTimeTimeSlotsChecked >= 50) {
-        lastTimeTimeSlotsChecked = millis();
-        newRelayState = eC.checkCountdownTimer(100);
-      }
-      break;
-    default:
-      newRelayState = false;
-    
-  }
-  // only update the relay if the state has changed, minimizing flickering.
-  if (newRelayState != relay.readState()) {
-    // Serial.printf("before set %d, %d",newRelayState, relay.readState());
-    relay.set(newRelayState);
-    // Serial.printf("after set %d, %d",newRelayState, relay.readState());
-    // update relay state to client
-    wsMod.sendCurrentRelayStates(newRelayState);
+void checkRelaysIfOn() {
+  for (int i=0;i<NUMBER_OF_RELAYS;i++) {
+    switch (eC.getOperationMode(i)) {
+      // manual mode
+      case 1:
+        newRelayStates[i] = eC.getRelayManualSetting(i);
+        // Serial.printf("newRelayState=%d\n", newRelayState);
+        break;
+      // if automatic timer is enabled, check all timeslots if any one of them is on
+      // in the current time.
+      case 2:
+        if (millis() - lastTimesTimeSlotsChecked[i] >= 500) {
+          lastTimesTimeSlotsChecked[i] = millis();
+          dtnow = rtcntp.getRTCTime();
+          newRelayStates[i] = eC.checkIfAnyTimeSlotOn(i, dtnow);
+        }
+        break;
+      // countdown timer mode
+      case 3:
+        if (millis() - lastTimesTimeSlotsChecked[i] >= 50) {
+          lastTimesTimeSlotsChecked[i] = millis();
+          newRelayStates[i] = eC.checkCountdownTimer(i);
+        }
+        break;
+      default:
+        newRelayStates[i] = false;
+    }
+    // only update the relay if the state has changed, minimizing flickering.
+    if (newRelayStates[i] != relays[i].readState()) {
+      // Serial.printf("before set %d, %d",newRelayState, relay.readState());
+      relays[i].set(newRelayStates[i]);
+      // Serial.printf("after set %d, %d",newRelayState, relay.readState());
+      // update relay state to client
+      wsMod.sendCurrentRelayStates(newRelayStates);
+    } 
   }
 }
 
 // function in loop to set the status LED mode.
-void setStatusLED() {
-  switch (eC.getLEDSetting())
-  {
-  case LED_ON:
-    statusLED.on();
-    break;
-  case LED_BLINK:
-    statusLED.blink(3000, 0.08);
-    break;
-  default:
-    statusLED.off();
-    break;
+void setStatusLEDs() {
+  for (int i=0;i<NUMBER_OF_RELAYS;i++) {
+    switch (eC.getLEDSetting(i))
+    {
+    case LED_ON:
+      statusLEDs[i].on();
+      break;
+    case LED_BLINK:
+      statusLEDs[i].blink(3000, 0.08);
+      break;
+    default:
+      statusLEDs[i].off();
+      break;
+    }
   }
 }
 
 /*
 callback function to toggle relay state when button is short pressed 
 */
-void buttonToggleRelay() {
-  switch (eC.getOperationMode()) {
+void buttonToggleRelay(int index) {
+  bool newState;
+  switch (eC.getOperationMode(index)) {
     case 1:
-      eC.setRelayManualSetting(!relay.readState());
-      Serial.printf("button set relay to %d\n", eC.getRelayManualSetting());
-      break;
-    case 3:
-      if (eC.checkCountdownTimer()) {
-        eC.stopCountdownTimer();
+      if (relays[index].readState()) {
+        newState = false;
       }
       else {
-        eC.startCountdownTimer();
+        newState = true;
+      }
+      Serial.printf("newstate=%d\n", newState);
+      eC.setRelayManualSetting(index, newState);
+      Serial.printf("button set relay to %d\n", eC.getRelayManualSetting(index));
+      break;
+    case 3:
+      if (eC.checkCountdownTimer(index)) {
+        eC.stopCountdownTimer(index);
+      }
+      else {
+        eC.startCountdownTimer(index);
       }
       break;
     default:
       break;
   }
+  eC.saveRelayConfig(index);
 }
 
 /*
 callback function to toggle the automatic timer when button is double pressed
 */
-void buttonToggleOperationMode() {
-  if (eC.getOperationMode() < 3) {
-    eC.setOperationMode(eC.getOperationMode()+1);
+void buttonToggleOperationMode(int index) {
+  if (eC.getOperationMode(index) < 3) {
+    eC.setOperationMode(index, eC.getOperationMode(index)+1);
   } else {
-    eC.setOperationMode(0);
+    eC.setOperationMode(index, 0);
   }
-  eC.saveMainConfig();
-  statusLED.startTimer(1000*eC.getOperationMode(), true);
-  statusLED.blink(1000, 0.5);
-  Serial.printf("button set operation mode to %d\n", eC.getOperationMode());
+  eC.saveRelayConfig(index);
+  statusLEDs[index].startTimer(1000*eC.getOperationMode(index), true);
+  statusLEDs[index].blink(1000, 0.5);
+  Serial.printf("button set operation mode to %d\n", eC.getOperationMode(index));
 }
 
 /*
@@ -170,8 +181,8 @@ Loop function to reset the wifi credential values when requested.
 */
 void checkToResetWiFi() {
   if (resetWiFiBlinkLED) {
-    statusLED.startTimer(2000, true);
-    statusLED.blink(800, 0.5);
+    statusLEDs[0].startTimer(2000, true);
+    statusLEDs[0].blink(800, 0.5);
     resetWiFiBlinkLED = false;
   }
 
@@ -231,22 +242,18 @@ void setup() {
   }
 
   for (int i=0;i<NUMBER_OF_RELAYS;i++) {
-    statusLEDs[i] = LED(ledPins[i]);
-    buttons[i] = Button(buttonPins[i]);
-    relays[i] = Relay(relayPins[i]);
+    // init status LED
+    statusLEDs[i].begin();
+    // init button
+    buttons[i].setIndex(i);
+    buttons[i].begin();
+    buttons[i].setShortPressFunc(buttonToggleRelay);
+    buttons[i].setDoublePressFunc(buttonToggleOperationMode);
+    // button.setLongPressFunc();
+    // init relay
+    relays[i].begin();
+    relays[i].set(LOW); // turn off relay
   }
-  // init status LED
-  statusLED.begin();
-
-  // init button
-  button.begin();
-  button.setShortPressFunc(buttonToggleRelay);
-  button.setLongPressFunc(buttonResetWiFi);
-  button.setDoublePressFunc(buttonToggleOperationMode);
-  
-  // init relay
-  relay.begin();
-  relay.set(LOW); // turn off relay
 
   // init eeprom config
   eC.begin();
@@ -255,7 +262,7 @@ void setup() {
   // init wsmod
   // scan wifi
   wsMod.scanWiFi();
-  wsMod.begin(&eC, &rtcntp, &relay);
+  wsMod.begin(&eC, &rtcntp, relays);
   // set websocket callback functions
   wsMod.setSendConnectionCallback();
   wsMod.setSendDateTimeCallback();
@@ -278,19 +285,21 @@ void setup() {
 
   eC.print();
   rtcntp.printTime();
-
-  // esp_web
 }
 
 void loop() {
   // start concurrent loops
-  statusLED.loop();
-  button.loop();
+  for (int i=0;i<NUMBER_OF_RELAYS;i++) {
+    statusLEDs[i].loop();
+  }
+  for (int i=0;i<NUMBER_OF_RELAYS;i++) {
+    buttons[i].loop();
+  }
   wsMod.cleanupClients();
   wsMod.checkWiFiStatusLoop();
 
-  checkRelayIfOn();
-  setStatusLED();
+  checkRelaysIfOn();
+  setStatusLEDs();
   checkToResetWiFi();
   sendTime();
 

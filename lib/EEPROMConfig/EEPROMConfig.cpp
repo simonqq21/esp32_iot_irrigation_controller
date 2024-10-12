@@ -245,11 +245,20 @@ void EEPROMConfig::begin() {
         }
         lastAddrPtr = _relayConfigAddrs[i];
     }
-
     for (int i=0;i<NUMBER_OF_RELAYS;i++) {
         for (int j=0;j<NUMBER_OF_TIMESLOTS;j++) {
             _timeslots[i][j] = new TimeSlot(&_eC._relayConfigs[i].timeSlots[j], j);
         }
+    }
+    _magicNumberAddr = lastAddrPtr + sizeof(relayConfig);
+    EEPROM.get(_magicNumberAddr, _eC.magicNumber);
+    Serial.printf("magic number = %d\n", _eC.magicNumber);
+    if (_eC.magicNumber != MAGIC_NUMBER) {
+        Serial.println("reset tf out of the eeprom");
+        this->save();
+        _eC.magicNumber = MAGIC_NUMBER;
+        EEPROM.put(_magicNumberAddr, _eC.magicNumber);
+        EEPROM.commit();
     }
 }
 
