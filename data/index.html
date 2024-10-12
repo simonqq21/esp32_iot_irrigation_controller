@@ -26,82 +26,86 @@
                 <a href="wifi.html">Configure WiFi</a>
             </div>
         </div>
-        <div id="configDiv">
-            <form>
-                <div>
-                    <span>Device name: </span>
-                    <input id="deviceNameInput" type="text">
-                </div>
-                <div>
-                    <span>Sync time automatically: </span>
-                    <input id="ntpEnableInput" type="checkbox">
-                </div>
-                <div id="gmtOffsetInputDiv">
-                    <span>GMT offset: </span>
-                    <input type="number" id="gmtOffsetInput">
-                </div>
-                <div id="manualTimeInputDiv">
-                    <span>Set date and time manually: </span>
-                    <input id="manualTimeInput" type="datetime-local" step="1">
-                    <button id="saveTimeBtn">Save</button>
-                </div>
-                <div>
-                    <span>Status LED setting: </span>
-                    <select id="ledModeInput">
-                        <option value=0>off</option>
-                        <option value=1>on</option>
-                        <option value=2>blinking</option>
-                    </select>
-                </div>
-                <div>
-                    <span>Select operation mode: </span>
-                    <select id="operationModeInput">
-                        <option value="0">Disabled</option>
-                        <option value="1">Manual</option>
-                        <option value="2">Schedule</option>
-                        <option value="3">Countdown timer</option>
-                    </select>
-                </div>
-                </div>
-            </form>
+        <div id="mainConfigDiv">
+            <div>
+                <span>Device name: </span>
+                <input id="deviceNameInput" type="text">
+            </div>
+            <div>
+                <span>Sync time automatically: </span>
+                <input id="ntpEnableInput" type="checkbox">
+            </div>
+            <div id="gmtOffsetInputDiv">
+                <span>GMT offset: </span>
+                <input type="number" id="gmtOffsetInput">
+            </div>
+            <div id="manualTimeInputDiv">
+                <span>Set date and time manually: </span>
+                <input id="manualTimeInput" type="datetime-local" step="1">
+                <button id="saveTimeBtn">Save</button>
+            </div>
+            <div id="saveMainConfigBtnDiv">
+                <button id="saveMainConfigBtn">Save settings</button>
+            </div>
+            
         </div>
-        <div id="manualRelayDiv">
-            <span>Set relay state: </span>
-            <input type="checkbox" id="manualRelayInput">
-        </div>
-        <div id="timeSlotsRelayDiv">
-            <div id="timeSlotTemplate" data-index="0" style="border: 2px solid black;">
-                <div>
-                    <span>Timeslot </span>
-                    <span class="timeSlotIndex">0</span>
-                </div>
-                <span>
-                    <span>Enabled:</span>
-                    <input type="checkbox" class="timeSlotEnabled">
-                </span>
-                <div>
+
+        <div id="relayConfigsDiv">
+            <div>
+                <span>Status LED setting: </span>
+                <select id="ledModeInput">
+                    <option value=0>off</option>
+                    <option value=1>on</option>
+                    <option value=2>blinking</option>
+                </select>
+            </div>
+            <div>
+                <span>Select operation mode: </span>
+                <select id="operationModeInput">
+                    <option value="0">Disabled</option>
+                    <option value="1">Manual</option>
+                    <option value="2">Schedule</option>
+                    <option value="3">Countdown timer</option>
+                </select>
+            </div>
+            <div id="manualRelayDiv">
+                <span>Set relay state: </span>
+                <input type="checkbox" id="manualRelayInput">
+            </div>
+            <div id="timeSlotsRelayDiv">
+                <div id="timeSlotTemplate" data-index="0" style="border: 2px solid black;">
+                    <div>
+                        <span>Timeslot </span>
+                        <span class="timeSlotIndex">0</span>
+                    </div>
                     <span>
-                        <span>Start time: </span>
-                        <input type="time" class="timeSlotStartTime" step="1">
+                        <span>Enabled:</span>
+                        <input type="checkbox" class="timeSlotEnabled">
                     </span>
-                    <span>
-                        <span>End time: </span>
-                        <input type="time" class="timeSlotEndTime" step="1">
-                    </span>
-                    <span>
-                        <span>Duration: </span>
-                        <input type="number" class="timeSlotDuration">
-                    </span>
+                    <div>
+                        <span>
+                            <span>Start time: </span>
+                            <input type="time" class="timeSlotStartTime" step="1">
+                        </span>
+                        <span>
+                            <span>End time: </span>
+                            <input type="time" class="timeSlotEndTime" step="1">
+                        </span>
+                        <span>
+                            <span>Duration: </span>
+                            <input type="number" class="timeSlotDuration">
+                        </span>
+                    </div>
                 </div>
             </div>
-        </div>
-        <div id="countdownTimerDiv">
-            <span>Countdown timer duration: </span>
-            <input type="number" id="countdownDurationInput" value="0">
-            <button id="startStopCountdownButton">Start</button>
-        </div>
-        <div id="saveConfigBtnDiv">
-            <button id="saveConfigBtn">Save settings</button>
+            <div id="countdownTimerDiv">
+                <span>Countdown timer duration: </span>
+                <input type="number" id="countdownDurationInput" value="0">
+                <button id="startStopCountdownButton">Start</button>
+            </div>
+            <div id="saveRelayConfigBtnDiv">
+                <button id="saveRelayConfigBtn">Save settings</button>
+            </div>
         </div>
     </body>
 </html>

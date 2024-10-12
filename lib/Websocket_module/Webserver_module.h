@@ -356,7 +356,6 @@ class WebserverModule {
         static EEPROMConfig* _eC;
         static RTCNTP* _rtcntp;
         static IPAddress _apIP;
-        // static Relay* _relays; 
         static Relay* _relays[NUMBER_OF_RELAYS]; 
 
         static void (*_sendConnectionFunc)();

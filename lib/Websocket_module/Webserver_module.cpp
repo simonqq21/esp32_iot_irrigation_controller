@@ -32,11 +32,10 @@ void WebserverModule::begin(EEPROMConfig* eC, RTCNTP* rtcntp, Relay relays[3]) {
     for (int i=0;i<NUMBER_OF_RELAYS;i++) {
         _relays[i] = &relays[i];
     }
-    _relays[0]->readState();
-
-    // start websockets and webserver
+    // start websockets and webserver   
     _ws.onEvent(onEvent);
     _server = new AsyncWebServer(_eC->getPort());
+    _server = new AsyncWebServer(7777);
     _server->addHandler(&_ws);
     _server->begin();
     Serial.println("initialized ws");
