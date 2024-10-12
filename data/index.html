@@ -45,12 +45,20 @@
                 <button id="saveTimeBtn">Save</button>
             </div>
             <div id="saveMainConfigBtnDiv">
-                <button id="saveMainConfigBtn">Save settings</button>
+                <button id="saveMainConfigBtn">Save main config</button>
             </div>
             
         </div>
 
         <div id="relayConfigsDiv">
+            <div id="relayIndexSelectorDiv">
+                <span>Select relay: </span>
+                <select name="relayIndexSelector" id="relayIndexSelector">
+                    <option value="0">Relay 1</option>
+                    <option value="1">Relay 2</option>
+                    <option value="2">Relay 3</option>
+                </select>
+            </div>
             <div>
                 <span>Status LED setting: </span>
                 <select id="ledModeInput">
@@ -104,7 +112,7 @@
                 <button id="startStopCountdownButton">Start</button>
             </div>
             <div id="saveRelayConfigBtnDiv">
-                <button id="saveRelayConfigBtn">Save settings</button>
+                <button id="saveRelayConfigBtn">Save relay config</button>
             </div>
         </div>
     </body>
