@@ -29,7 +29,7 @@ export function requestConnection(ws) {
  * @param {WebSocket} ws - websocket instance
  */
 export function requestRelayState(ws) {
-    requestData(ws, "relay_state");
+    requestData(ws, "relay_states");
 }
 /**
  * Request for the system date and time from the ESP32.
@@ -42,8 +42,15 @@ export function requestDateTime(ws) {
  * Request for the configuration from the ESP32.
  * @param {WebSocket} ws - websocket instance
  */
-export function requestConfig(ws) {
-    requestData(ws, "config");
+export function requestMainConfig(ws) {
+    requestData(ws, "main_config");
+}
+/**
+ * Request for the configuration from the ESP32.
+ * @param {WebSocket} ws - websocket instance
+ */
+export function requestRelayConfigs(ws) {
+    requestData(ws, "relay_configs");
 }
 
 
@@ -109,10 +116,11 @@ export function saveConnection(ws, payload) {
  * @param {WebSocket} ws - websocket instance
  * @param {Object} payload - object containing manual relay state to be saved 
  * to the ESP32.
+ * @param {Boolean} payload.index - relay index
  * @param {Boolean} payload.relay_state - manual relay state
  */
-export function saveRelayState(ws, payload) {
-    sendData(ws, "save", "relay_state", payload);
+export function saveRelayStates(ws, payload) {
+    sendData(ws, "save", "relay_states", payload);
 }
 
 /**
@@ -134,18 +142,38 @@ export function saveDateTime(ws, payload) {
  * @param {String} payload.name - name of the ESP32 relay
  * @param {Boolean} payload.ntpEnabledSetting - NTP time enabled setting
  * @param {Number} payload.gmtOffsetSetting - GMT offset in hours
- * @param {Boolean} payload.timerEnabledSetting - automatic relay timer enabled setting
+ */
+export function saveMainConfig(ws, payload) {
+    sendData(ws, "save", "main_config", payload);
+}
+
+/**
+ * Save  relay configurations to the ESP32.
+ * @param {WebSocket} ws - websocket instance
+ * @param {Object} payload - object containing main configuration to be saved 
+ * to the ESP32.
+ * @param {Number} payload.index - integer relay index
  * @param {Number} payload.ledSetting - integer status LED setting
+ * @param {Boolean} payload.operationModeSetting - automatic relay timer enabled setting
  * @param {Object[]} payload.timeSlots[] - array of timeslot objects
  * @param {Number} payload.timeSlots[].index - index of each timeslot
  * @param {Boolean} payload.timeSlots[].enabled - enabled setting of each timeslot
  * @param {String} payload.timeSlots[].onStartTime - start time of each timeslot in ISO format
  * @param {String} payload.timeSlots[].onEndTime - end time of each timeslot in ISO format
+ * @param {Number} payload.countdownDurationSetting - countdown duration in seconds
  */
-export function saveConfig(ws, payload) {
-    sendData(ws, "save", "config", payload);
+export function saveRelayConfigs(ws, payload) {
+    sendData(ws, "save", "relay_configs", payload);
 }
 
+/**
+ * Switch relay states
+ * @param {WebSocket} ws - websocket instance
+ * @param {Object} payload - object containing main configuration to be saved 
+ * to the ESP32.
+ * @param {Boolean} payload.index - relay index
+ * @param {Boolean} payload.relay_state - manual relay state
+ */
 export function switchRelayState(ws, payload) {
-    sendData(ws, "switch", "relay_state", payload);
+    sendData(ws, "switch", "relay_states", payload);
 }

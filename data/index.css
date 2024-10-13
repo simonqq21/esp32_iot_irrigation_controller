@@ -1,4 +1,4 @@
-#relayStatusIndicator {
+.relayStatusIndicator {
     display: inline-block;
     width: 16px;
     height: 16px; 
@@ -14,9 +14,9 @@
     background-color: green;
 }
 
-#relayStateDiv {
+/* #relayStateDiv {
     display: flex; align-items: center;
-}
+} */
 
 #relayStateDiv > * {
     margin-right: 20px;
