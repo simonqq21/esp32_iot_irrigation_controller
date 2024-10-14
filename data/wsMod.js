@@ -174,6 +174,6 @@ export function saveRelayConfigs(ws, payload) {
  * @param {Boolean} payload.index - relay index
  * @param {Boolean} payload.relay_state - manual relay state
  */
-export function switchRelayState(ws, payload) {
+export function switchRelayStates(ws, payload) {
     sendData(ws, "switch", "relay_states", payload);
 }

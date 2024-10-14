@@ -104,17 +104,24 @@ document.addEventListener("DOMContentLoaded", function() {
 
     // click eventlistener for saveMainConfigBtn
     saveMainConfigBtn.addEventListener('click', () => {
-
+        wsMod.saveMainConfig(ws, mainConfig);
+        console.log(JSON.stringify(mainConfig));
+        console.log("saved main config");
     });
 
     // change eventlistener for relay index selector
     relayIndexSelector.addEventListener("change", () => {
-
+        getCurRelayIndex();
+        updateRelayConfigsDisplay(curIndex);
     });
+
+    function getCurRelayIndex() {
+        curIndex = relayIndexSelector.value;
+    }
 
     // change eventListener for ledModeInput
     ledModeInput.addEventListener("change", () => {
-        mainConfig.ledSetting = ledModeInput.value;
+        relayConfigs[curIndex].ledSetting = ledModeInput.value;
     });
 
     // change eventListener for timerEnableInput
@@ -122,14 +129,18 @@ document.addEventListener("DOMContentLoaded", function() {
         // set visible div when timerEnableInput is changed
         console.log(`operation mode ${operationModeInput.value}`);
         updateOperationModeDivDisplay();
-        mainConfig.operationModeSetting = operationModeInput.value;
+        relayConfigs[curIndex].operationModeSetting = operationModeInput.value;
     });
 
     // change eventListener for manualRelayInput
     manualRelayInput.addEventListener("change", () => {
-        mainConfig.relayManualSetting = manualRelayInput.checked;
-        curRelayStates.relay_state = manualRelayInput.checked;
-        wsMod.switchRelayState(ws, curRelayStates);
+        relayConfigs[curIndex].relayManualSetting = manualRelayInput.checked;
+        curRelayStates.relay_states[curIndex] = manualRelayInput.checked;
+        let payload = {
+            index: curIndex,
+            relay_state: curRelayStates.relay_states[curIndex],
+        };
+        wsMod.switchRelayStates(ws, payload);
     });
 
     // Set the callbacks for the input elements inside each timeslot.
@@ -145,7 +156,7 @@ document.addEventListener("DOMContentLoaded", function() {
         timeSlotsEnableds.forEach(element => {
             element.addEventListener("change", () => {
                 let tsIndex = element.dataset.tsIndex;
-                mainConfig.timeSlots[tsIndex].enabled = element.checked;
+                relayConfigs[curIndex].timeSlots[tsIndex].enabled = element.checked;
                 // console.log(JSON.stringify(config)); 
             });
         });
@@ -158,14 +169,14 @@ document.addEventListener("DOMContentLoaded", function() {
         timeSlotsStartTimes.forEach(element => {
             element.addEventListener("change", () => {
                 let tsIndex = element.dataset.tsIndex;
-                mainConfig.timeSlots[tsIndex].onStartTime = element.value + "Z";
-                mainConfig.timeSlots[tsIndex].duration = calculateDuration(
-                    mainConfig.timeSlots[tsIndex].onStartTime,
-                    mainConfig.timeSlots[tsIndex].onEndTime
+                relayConfigs[curIndex].timeSlots[tsIndex].onStartTime = element.value + "Z";
+                relayConfigs[curIndex].timeSlots[tsIndex].duration = calculateDuration(
+                    relayConfigs[curIndex].timeSlots[tsIndex].onStartTime,
+                    relayConfigs[curIndex].timeSlots[tsIndex].onEndTime
                 );
-                console.log(mainConfig.timeSlots[tsIndex].duration);
+                console.log(relayConfigs[curIndex].timeSlots[tsIndex].duration);
                 element.parentElement.parentElement.getElementsByClassName("timeSlotDuration")[0]
-                    .value = mainConfig.timeSlots[tsIndex].duration;
+                    .value = relayConfigs[curIndex].timeSlots[tsIndex].duration;
                 // console.log(JSON.stringify(config)); 
             });
         });
@@ -173,14 +184,14 @@ document.addEventListener("DOMContentLoaded", function() {
         timeSlotsEndTimes.forEach(element => {
             element.addEventListener("change", () => {
                 let tsIndex = element.dataset.tsIndex;
-                mainConfig.timeSlots[tsIndex].onEndTime = element.value + "Z";
-                mainConfig.timeSlots[tsIndex].duration = calculateDuration(
-                    mainConfig.timeSlots[tsIndex].onStartTime,
-                    mainConfig.timeSlots[tsIndex].onEndTime
+                relayConfigs[curIndex].timeSlots[tsIndex].onEndTime = element.value + "Z";
+                relayConfigs[curIndex].timeSlots[tsIndex].duration = calculateDuration(
+                    relayConfigs[curIndex].timeSlots[tsIndex].onStartTime,
+                    relayConfigs[curIndex].timeSlots[tsIndex].onEndTime
                 );
-                console.log(mainConfig.timeSlots[tsIndex].duration);
+                console.log(relayConfigs[curIndex].timeSlots[tsIndex].duration);
                 element.parentElement.parentElement.getElementsByClassName("timeSlotDuration")[0]
-                    .value = mainConfig.timeSlots[tsIndex].duration;
+                    .value = relayConfigs[curIndex].timeSlots[tsIndex].duration;
                 // console.log(JSON.stringify(config)); 
             });
         });
@@ -189,17 +200,17 @@ document.addEventListener("DOMContentLoaded", function() {
             element.addEventListener("change", () => {
                 let tsIndex = element.dataset.tsIndex;
                 if (element.value >=0 && element.value < 24*60*60-1) {
-                    mainConfig.timeSlots[tsIndex].duration = element.value;
+                    relayConfigs[curIndex].timeSlots[tsIndex].duration = element.value;
                 }
                 else if (element.value < 0) {
-                    mainConfig.timeSlots[tsIndex].duration = 0;
+                    relayConfigs[curIndex].timeSlots[tsIndex].duration = 0;
                 }
                 else {
-                    mainConfig.timeSlots[tsIndex].duration = 24*60*60-1;
+                    relayConfigs[curIndex].timeSlots[tsIndex].duration = 24*60*60-1;
                 }
-                element.value = mainConfig.timeSlots[tsIndex].duration;
-                let endTimeString = calculateEndTime(mainConfig.timeSlots[tsIndex].onStartTime, mainConfig.timeSlots[tsIndex].duration);
-                mainConfig.timeSlots[tsIndex].onEndTime = endTimeString + 'Z';
+                element.value = relayConfigs[curIndex].timeSlots[tsIndex].duration;
+                let endTimeString = calculateEndTime(relayConfigs[curIndex].timeSlots[tsIndex].onStartTime, relayConfigs[curIndex].timeSlots[tsIndex].duration);
+                relayConfigs[curIndex].timeSlots[tsIndex].onEndTime = endTimeString + 'Z';
                 element.parentElement.parentElement.getElementsByClassName("timeSlotEndTime")[0].value = endTimeString;              
                 // 2024-09-27T04:01:00.981Z
                 // console.log(config.timeSlots[tsIndex].duration);
@@ -208,19 +219,24 @@ document.addEventListener("DOMContentLoaded", function() {
     }
     
     countdownDurationInput.addEventListener('change', () => {
-        mainConfig.countdownDurationSetting = countdownDurationInput.value;
+        relayConfigs[curIndex].countdownDurationSetting = countdownDurationInput.value;
     });
 
     countdownStartStopButton.addEventListener('click', () => {
-        let countdowntimercmd = structuredClone(curRelayStates);
-        countdowntimercmd.relay_state = !countdowntimercmd.relay_state;
-        wsMod.switchRelayState(ws, countdowntimercmd);
+        // let countdowntimercmd = structuredClone(curRelayStates);
+        // countdowntimercmd.relay_state = !countdowntimercmd.relay_state;
+        // wsMod.switchRelayStates(ws, countdowntimercmd);
+
+        curRelayStates.relay_states[curIndex] = !curRelayStates.relay_states[curIndex];
+        wsMod.switchRelayStates(ws, curRelayStates);
     });
 
-    // click eventListener for saveConfigBtn
+    // click eventListener for saveRelayConfigBtn
     saveRelayConfigBtn.addEventListener("click", () => {
-        wsMod.saveRelayConfigs(ws, mainConfig);
-        console.log("save config");
+        // current relay index value
+        console.log(`curindex=${curIndex}`);
+        wsMod.saveRelayConfigs(ws, relayConfigs[curIndex]);
+        console.log("save relay config");
     });
 
 
@@ -235,13 +251,14 @@ document.addEventListener("DOMContentLoaded", function() {
         datetime: new Date(Date.UTC(2024,1,1,0,0,0)).toISOString(),
     };
     // current relay state 
-    let curRelayStates = {relay_state: [false, false, false]};
+    let curRelayStates = {relay_states: [false, false, false]};
     // main configuration
     let mainConfig = {
         name: "",
         ntpEnabledSetting: false, 
         gmtOffsetSetting: 0,
     };
+    let curIndex;
     // list of relay configurations
     let relayConfigs = [
         {
@@ -251,8 +268,8 @@ document.addEventListener("DOMContentLoaded", function() {
                 {   
                     index: 0,
                     enabled: false, 
-                    onStartTime: new Date(2024, 1, 1, 0, 0, 0),
-                    onEndTime: new Date(2024, 1, 1, 1, 0, 0),
+                    onStartTime: "07:00:00Z",
+                    onEndTime: "08:00:00Z",
                 },
             ],
             countdownDurationSetting: 0,
@@ -274,6 +291,7 @@ document.addEventListener("DOMContentLoaded", function() {
             wsMod.requestDateTime(ws);
             wsMod.requestRelayState(ws);
             wsMod.requestMainConfig(ws);
+            wsMod.requestRelayConfigs(ws);
         })
         // websocket message handler
         ws.addEventListener("message", (event) => {
@@ -328,6 +346,7 @@ document.addEventListener("DOMContentLoaded", function() {
      */
     function updateDisplayedRelayStates(payload) {
         curRelayStates = payload;
+        console.log(`new currelays=${JSON.stringify(curRelayStates)}`);
         for (let i=0;i<3;i++) {
             
 
@@ -360,6 +379,10 @@ document.addEventListener("DOMContentLoaded", function() {
     function receiveMainConfigCallback(payload) {
         // save payload into config
         mainConfig = payload;
+        updateMainConfigDisplay();
+    }
+
+    function updateMainConfigDisplay() {
         // update name input value
         deviceNameInput.value = mainConfig["name"];
         // update NTP enable value
@@ -368,20 +391,30 @@ document.addEventListener("DOMContentLoaded", function() {
         gmtOffsetInput.value = mainConfig["gmtOffsetSetting"];
         // set visible div based on NTP enabled value
         updateNtpEnableDivDisplay();
+    }
+
+    function receiveRelayConfigsCallback(payload) {
+        let index = payload["index"];
+        console.log(`relay index = ${index}`);
+        relayConfigs[index] = payload;
+        updateRelayConfigsDisplay(curIndex);
+    }
+
+    function updateRelayConfigsDisplay(index) {
         // update status LED value
-        ledModeInput.value = mainConfig["ledSetting"];
+        ledModeInput.value = relayConfigs[index]["ledSetting"];
         // update operation mode setting
-        operationModeInput.value = mainConfig["operationModeSetting"];
+        operationModeInput.value = relayConfigs[index]["operationModeSetting"];
         // set visible div based on timer enabled value
         updateOperationModeDivDisplay();
-        manualRelayInput.checked = mainConfig["relayManualSetting"];
+        manualRelayInput.checked = relayConfigs[index]["relayManualSetting"];
         // refresh all timeslots
         // remove all timeslots
         while (timeSlotsInputs.length > 1) {
             timeSlotsRelayDiv.removeChild(timeSlotsInputs[0]);
         }
         // refresh all timeslots
-        for (let i in mainConfig["timeSlots"]) {
+        for (let i in relayConfigs[index]["timeSlots"]) {
             // clone timeslot template, make it visible, and change the classname
             let newTimeSlot = timeSlotTemplate.cloneNode(true);
             newTimeSlot.classList.add("timeSlot");
@@ -399,11 +432,13 @@ document.addEventListener("DOMContentLoaded", function() {
             timeSlotDuration.dataset.tsIndex = i;
             // console.log(`dataset.tsIndex = ${timeSlotIndex.dataset.tsIndex}`);
             // set the values from the config into the fields of the new timeslot element
-            timeSlotIndex.textContent = mainConfig["timeSlots"][i]["index"];
-            timeSlotEnabled.checked = mainConfig["timeSlots"][i]["enabled"];
+            timeSlotIndex.textContent = i;
+            console.log(`i=${i}`);
+            // relayConfigs[index]["timeSlots"][i]["index"]
+            timeSlotEnabled.checked = relayConfigs[index]["timeSlots"][i]["enabled"];
             // get time ISO strings of start and end times
-            let startTimeString = mainConfig["timeSlots"][i]["onStartTime"].slice(0,8);
-            let endTimeString = mainConfig["timeSlots"][i]["onEndTime"].slice(0,8);
+            let startTimeString = relayConfigs[index]["timeSlots"][i]["onStartTime"].slice(0,8);
+            let endTimeString = relayConfigs[index]["timeSlots"][i]["onEndTime"].slice(0,8);
             // set values for onStartTime and onEndTime
             timeSlotStartTime.value = startTimeString;
             timeSlotEndTime.value = endTimeString;
@@ -416,13 +451,9 @@ document.addEventListener("DOMContentLoaded", function() {
         // set callbacks for all timeslots
         setTimeSlotsCallbacks();
         // get countdown duration value 
-        countdownDurationInput.value = mainConfig["countdownDurationSetting"];
+        countdownDurationInput.value = relayConfigs[index]["countdownDurationSetting"];
     }
-
-    function receiveRelayConfigsCallback(payload) {
-
-    }
-
+    
     /**
      * Calculate duration of a timeslot in seconds given the start and end times 
      * of the day.
@@ -528,6 +559,8 @@ document.addEventListener("DOMContentLoaded", function() {
     initWS();
     // update all visible divs on page load
     createRelayStates();
+    getCurRelayIndex();
+    updateRelayConfigsDisplay(curIndex);
     updateNtpEnableDivDisplay();
     updateOperationModeDivDisplay();
 });
