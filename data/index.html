@@ -17,14 +17,16 @@
                 <span>System time: </span>
                 <span id="systemTime">2000-01-01T00:00:00Z</span>
             </div>
-            <div id="relayStateDiv">
+            <div id="relayStatesDiv">
                 <div>Relay state: </div>
                 <table>
-                    <tr>
-                        <td class="relayIndex">Relay 0:</td>
-                        <td><span class="relayStatusIndicator on"></span></td>
-                        <td class="relayStatusText">On</td>
-                    </tr>
+                    <tbody id="relayStatesTable">
+                        <tr id="relayStateTemplate" style="display: none">
+                            <td class="relayIndex">Relay 0: </td>
+                            <td><span class="relayStatusIndicator on"></span></td>
+                            <td class="relayStatusText">On</td>
+                        </tr>
+                    </tbody>
                 </table>
             </div>
             <div>

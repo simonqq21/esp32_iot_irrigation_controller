@@ -15,9 +15,13 @@ document.addEventListener("DOMContentLoaded", function() {
     /*
     DOM elements
     */
+    // relay states elements
+    let relayStateTemplate = document.getElementById("relayStateTemplate");
+    let relayStatesTable = document.getElementById("relayStatesTable");
+    let relayStates = relayStatesTable.getElementsByClassName('relayState');
     // relay status indicator and text
-    const relayStatusTextOutput = document.getElementById("relayStatusText");
-    const relayStatusIndicatorOutput = document.getElementById("relayStatusIndicator");
+    // const relayStatusTextOutput = document.getElementById("relayStatusText");
+    // const relayStatusIndicator = document.getElementById("relayStatusIndicator");
     // device name input
     const deviceNameInput = document.getElementById("deviceNameInput");
     // NTP enable input
@@ -278,8 +282,8 @@ document.addEventListener("DOMContentLoaded", function() {
             let callbacks = {
                 "datetime": updateDisplayedTime,
                 "relay_states": updateDisplayedRelayStates,
-                "main_config": receiveConfigCallback,
-                "relay_configs": receiveConfigCallback,
+                "main_config": receiveMainConfigCallback,
+                "relay_configs": receiveRelayConfigsCallback,
             }
             wsMod.receiveData(event, callbacks);
         });
@@ -301,30 +305,59 @@ document.addEventListener("DOMContentLoaded", function() {
         document.getElementById("systemTime").textContent = curDateTimeVal;
     }
 
+    function createRelayStates() {
+        while (relayStates.length) {
+            relayStatesTable.removeChild(relayStates[0]);
+        }
+        
+        for (let i=0;i<3;i++) {
+            console.log(i);
+            let newRelayState = relayStateTemplate.cloneNode(true);
+            console.log(`newrelayState = ${newRelayState}`);
+            newRelayState.classList.add('relayState');
+            newRelayState.dataset.index = i;
+            newRelayState.style.display = "block";
+            let relayIndex = newRelayState.getElementsByClassName('relayIndex')[0];
+            relayIndex.textContent = `Relay ${i}: `;
+            relayStatesTable.appendChild(newRelayState);
+        }
+    }
+
     /**
      * Callback function to update current relay state display and update the text of the start/stop countdown timer button
      */
     function updateDisplayedRelayStates(payload) {
-        // console.log(JSON.stringify(payload));
         curRelayStates = payload;
-        if (payload["relay_state"]) {
-            relayStatusTextOutput.textContent = "On";
-            relayStatusIndicatorOutput.classList.add("on");
-            relayStatusIndicatorOutput.classList.remove("off");
-            countdownStartStopButton.textContent = "Stop";
+        for (let i=0;i<3;i++) {
+            
+
+            let relayStatusIndicator = relayStates[i].getElementsByClassName('relayStatusIndicator')[0];
+            let relayStatusText = relayStates[i].getElementsByClassName("relayStatusText")[0];
+
+            if (payload["relay_states"][i]) {
+                relayStatusText.textContent = "On";
+                relayStatusIndicator.classList.add("on");
+                relayStatusIndicator.classList.remove("off");
+                countdownStartStopButton.textContent = "Stop";
+            }
+            else {
+                relayStatusText.textContent = "Off";
+                relayStatusIndicator.classList.add("off");
+                relayStatusIndicator.classList.remove("on");
+                countdownStartStopButton.textContent = "Start";
+            } 
         }
-        else {
-            relayStatusTextOutput.textContent = "Off";
-            relayStatusIndicatorOutput.classList.add("off");
-            relayStatusIndicatorOutput.classList.remove("on");
-            countdownStartStopButton.textContent = "Start";
-        } 
+        
+        // relayStates = relayStatesTable.getElementsByClassName('relayState');
+        // console.log(`relayStates length = ${relayStates.length}`);
+
+
     }
 
     /**
      * Callback function to update displayed configuration
      */
-    function receiveConfigCallback(payload) {
+    function receiveMainConfigCallback(payload) {
         // save payload into config
         mainConfig = payload;
         // update name input value
@@ -384,6 +417,10 @@ document.addEventListener("DOMContentLoaded", function() {
         setTimeSlotsCallbacks();
         // get countdown duration value 
         countdownDurationInput.value = mainConfig["countdownDurationSetting"];
+    }
+
+    function receiveRelayConfigsCallback(payload) {
+
     }
 
     /**
@@ -490,6 +527,7 @@ document.addEventListener("DOMContentLoaded", function() {
     // initws
     initWS();
     // update all visible divs on page load
+    createRelayStates();
     updateNtpEnableDivDisplay();
     updateOperationModeDivDisplay();
 });
