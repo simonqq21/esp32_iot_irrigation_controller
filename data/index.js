@@ -228,7 +228,11 @@ document.addEventListener("DOMContentLoaded", function() {
         // wsMod.switchRelayStates(ws, countdowntimercmd);
 
         curRelayStates.relay_states[curIndex] = !curRelayStates.relay_states[curIndex];
-        wsMod.switchRelayStates(ws, curRelayStates);
+        let payload = {
+            index: curIndex,
+            relay_state: curRelayStates.relay_states[curIndex],
+        };
+        wsMod.switchRelayStates(ws, payload);
     });
 
     // click eventListener for saveRelayConfigBtn
@@ -410,7 +414,7 @@ document.addEventListener("DOMContentLoaded", function() {
         manualRelayInput.checked = relayConfigs[index]["relayManualSetting"];
         // refresh all timeslots
         // remove all timeslots
-        while (timeSlotsInputs.length > 1) {
+        while (timeSlotsInputs.length > 0) {
             timeSlotsRelayDiv.removeChild(timeSlotsInputs[0]);
         }
         // refresh all timeslots
