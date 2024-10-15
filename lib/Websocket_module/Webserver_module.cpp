@@ -437,6 +437,7 @@ void WebserverModule::receiveRelayConfigs(JsonDocument inputPayloadJSON) {
             _rtcntp->getRTCTime());
     }
     _eC->setCountdownDuration(relayIndex, inputPayloadJSON["countdownDurationSetting"]);
+    _eC->saveRelayConfig(relayIndex);
 }
 
 /**

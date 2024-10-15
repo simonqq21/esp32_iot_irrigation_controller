@@ -4,13 +4,12 @@ document.addEventListener("DOMContentLoaded", function() {
     /*
     websocket configuration
     */
-    // let port = window.location.port;
-    // let hostname = window.location.hostname;
-    // let port = 7778;
+    let port = window.location.port;
+    let hostname = window.location.hostname;
     // let hostname = "192.168.57.70";
     // let hostname = "192.168.5.70";
-    let hostname = "192.168.4.1";
-    let port = 7777;
+    // let hostname = "192.168.4.1";
+    // let port = 7777;
 
     /*
     DOM elements
