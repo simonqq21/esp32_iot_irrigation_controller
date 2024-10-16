@@ -4,11 +4,19 @@ document.addEventListener("DOMContentLoaded", function() {
     // set page to the WiFi hotspot list upon load.
     setPage("listwifi");
 
-    let port = window.location.port;
-    let hostname = window.location.hostname;
-    // let hostname = "192.168.5.70";
-    // let hostname = "192.168.4.1";
-    // let port = 7777;
+    let hostname;
+    let port;
+    if (window.location.hostname == "localhost") {
+        // hostname = "192.168.57.70";
+        hostname = "192.168.5.70";
+        // hostname = "192.168.4.1";
+        port = 7777;
+    }
+    else {
+        port = window.location.port;
+        hostname = window.location.hostname;
+    }
+    console.log(hostname);
     let url = `ws://${hostname}:${port}/ws`;
     console.log(`url=${url}`);
     let ws = new WebSocket(url);
