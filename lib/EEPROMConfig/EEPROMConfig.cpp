@@ -376,12 +376,12 @@ void EEPROMConfig::setGMTOffset(short gmtOffset) {
 }
 
 short EEPROMConfig::getMainLEDSetting() {
-    // return _eC._mainConfig.ledSetting;
-    return 1;
+    return _eC._mainConfig.ledSetting;
+    // return 1;
 }
         
 void EEPROMConfig::setMainLEDSetting(short ledSetting) {
-    // _eC._mainConfig.ledSetting = ledSetting;
+    _eC._mainConfig.ledSetting = ledSetting;
 }
 
 short EEPROMConfig::getLEDSetting(int rIndex) {

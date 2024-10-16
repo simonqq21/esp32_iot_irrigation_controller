@@ -38,13 +38,13 @@ struct connectionConfig {
 struct mainConfig {
     char deviceName[NAME_LENGTH];
     bool ntpEnabledSetting;
-    short gmtOffsetSetting;
-    short ledSetting;
+    int gmtOffsetSetting;
+    int ledSetting;
 };
 
 struct relayConfig {
     int index;
-    short ledSetting;
+    int ledSetting;
     int operationModeSetting; // 0 for disabled, 1 for manual, 2 for daily timer, and 3 for countdown timer
     bool relayManualSetting;
     timeSlot timeSlots[NUMBER_OF_TIMESLOTS];
