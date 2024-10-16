@@ -9,10 +9,11 @@
 #include "esp_websocket_client.h"
 
 /*
-TODO:
-add multiple relays
+TODO for v3:
+add method to LED to play a sequence of bools over a certain span of time in a cycle
+Use that method to blink out the LED state on the status LEDs
 make the UI more user friendly, such as greying out the save button until a 
-  setting has been changed.
+setting has been changed.
 */
 
 /*
