@@ -215,6 +215,8 @@ void EEPROMConfig::print() {
     Serial.printf("Device name = %s\n", this->getName());
     Serial.printf("ntpEnabledSetting=%d\n", this->getNTPEnabled());
     Serial.printf("gmtOffsetSetting=%d\n", this->getGMTOffset());
+    Serial.printf("mainLEDSetting=%d\n", this->getMainLEDSetting());
+    Serial.println();
     for (int i=0;i<NUMBER_OF_RELAYS;i++) {
         Serial.printf("index=%d\n", i);
         Serial.printf("ledSetting=%d\n", this->getLEDSetting(i));
@@ -232,10 +234,12 @@ void EEPROMConfig::print() {
 
 void EEPROMConfig::begin() {
     EEPROM.begin(sizeof(eepromConfig));
+    Serial.printf("sizeof eepromconfig = %u\n", sizeof(eepromConfig));
+    unsigned long lastAddrPtr;
     // compute starting addresses for connection config and main config structs
     _connectionConfigAddr = _eepromAddr;
     _mainConfigAddr = _connectionConfigAddr + sizeof(connectionConfig);
-    unsigned long lastAddrPtr = _mainConfigAddr;
+    lastAddrPtr = _mainConfigAddr;
     for (int i=0;i<NUMBER_OF_RELAYS;i++) {
         if (i==0) {
             _relayConfigAddrs[i] = lastAddrPtr + sizeof(mainConfig);
@@ -254,11 +258,16 @@ void EEPROMConfig::begin() {
     EEPROM.get(_magicNumberAddr, _eC.magicNumber);
     Serial.printf("magic number = %d\n", _eC.magicNumber);
     if (_eC.magicNumber != MAGIC_NUMBER) {
-        Serial.println("reset tf out of the eeprom");
+        Serial.println("reset eeprom");
         this->save();
         _eC.magicNumber = MAGIC_NUMBER;
         EEPROM.put(_magicNumberAddr, _eC.magicNumber);
         EEPROM.commit();
+    }
+    Serial.println(_connectionConfigAddr);
+    Serial.println(_mainConfigAddr);
+    for (int i=0;i<3;i++) {
+        Serial.println(_relayConfigAddrs[i]);
     }
 }
 
@@ -303,6 +312,7 @@ void EEPROMConfig::saveMainConfig() {
 }
 
 void EEPROMConfig::saveRelayConfig(int rIndex) {
+    Serial.println(rIndex);
     EEPROM.put(_relayConfigAddrs[rIndex], _eC._relayConfigs[rIndex]);
     EEPROM.commit();
 }
@@ -358,10 +368,20 @@ void EEPROMConfig::setNTPEnabled(bool ntpEnabled) {
 
 short EEPROMConfig::getGMTOffset() {
     return _eC._mainConfig.gmtOffsetSetting;
+    // return 1;
 }
 
 void EEPROMConfig::setGMTOffset(short gmtOffset) {
     _eC._mainConfig.gmtOffsetSetting = gmtOffset;
+}
+
+short EEPROMConfig::getMainLEDSetting() {
+    // return _eC._mainConfig.ledSetting;
+    return 1;
+}
+        
+void EEPROMConfig::setMainLEDSetting(short ledSetting) {
+    // _eC._mainConfig.ledSetting = ledSetting;
 }
 
 short EEPROMConfig::getLEDSetting(int rIndex) {

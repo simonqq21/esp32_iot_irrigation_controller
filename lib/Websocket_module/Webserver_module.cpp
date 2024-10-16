@@ -299,6 +299,7 @@ void WebserverModule::sendMainConfig(JsonDocument inputPayloadJSON) {
         payloadJSON["name"] = _eC->getName();
         payloadJSON["ntpEnabledSetting"] = _eC->getNTPEnabled();
         payloadJSON["gmtOffsetSetting"] = _eC->getGMTOffset();
+        payloadJSON["ledSetting"] = _eC->getMainLEDSetting();
     serializeJson(_jsonDoc, _strData);
     Serial.printf("serialized JSON = %s\n", _strData);
     _ws.textAll(_strData);
@@ -419,6 +420,7 @@ void WebserverModule::receiveMainConfig(JsonDocument inputPayloadJSON) {
     _eC->setName(inputPayloadJSON["name"]);
     _eC->setNTPEnabled(inputPayloadJSON["ntpEnabledSetting"]);
     _eC->setGMTOffset(inputPayloadJSON["gmtOffsetSetting"]);
+    _eC->setMainLEDSetting(inputPayloadJSON["ledSetting"]);
     _eC->saveMainConfig();
     Serial.println("saved config");
 }
@@ -468,12 +470,6 @@ void WebserverModule::receiveData(String cmd, String type, JsonDocument payloadJ
                 _receiveConnectionFunc();
             }
         }
-        // else if (type == RELAY_STATES_TYPE) {
-        //     receiveRelayState(payloadJSON);
-        //     if (_receiveRelayStateFunc != NULL) {
-        //         _receiveRelayStateFunc();
-        //     }
-        // }
         else if (type == DATETIME_TYPE) {
             receiveDateTime(payloadJSON);
             if (_receiveDateTimeFunc != NULL) {

@@ -6,7 +6,7 @@
 #include <time.h>
 #include <SPI.h>
 
-#define NUMBER_OF_TIMESLOTS 8
+#define NUMBER_OF_TIMESLOTS 4
 #define SSID_LENGTH 32
 #define PASS_LENGTH 32 
 #define NAME_LENGTH 32 
@@ -15,8 +15,8 @@ const int MAGIC_NUMBER = 0x88;
 // structs
 
 struct timeSlot {
-    unsigned short index;
-    short initialized;
+    unsigned int index;
+    int initialized;
     bool enabled;
     DateTime onStartTime, onEndTime; // nonvolatile time only values for on start and on end
     unsigned int durationInSeconds;
@@ -39,6 +39,7 @@ struct mainConfig {
     char deviceName[NAME_LENGTH];
     bool ntpEnabledSetting;
     short gmtOffsetSetting;
+    short ledSetting;
 };
 
 struct relayConfig {
@@ -123,6 +124,8 @@ class EEPROMConfig {
         void setNTPEnabled(bool ntpEnabled);
         short getGMTOffset();
         void setGMTOffset(short gmtOffset);
+        short getMainLEDSetting();
+        void setMainLEDSetting(short ledSetting);
         
         // relay config methods
         short getLEDSetting(int rIndex);

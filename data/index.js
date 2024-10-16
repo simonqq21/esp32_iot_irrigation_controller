@@ -8,8 +8,8 @@ document.addEventListener("DOMContentLoaded", function() {
     let port;
     if (window.location.hostname == "localhost") {
         // hostname = "192.168.57.70";
-        hostname = "192.168.5.70";
-        // hostname = "192.168.4.1";
+        // hostname = "192.168.5.70";
+        hostname = "192.168.4.1";
         port = 7777;
     }
     else {
@@ -39,6 +39,7 @@ document.addEventListener("DOMContentLoaded", function() {
     const manualTimeInputDiv = document.getElementById("manualTimeInputDiv");
         const manualTimeInput = document.getElementById("manualTimeInput");
         const saveTimeBtn = document.getElementById("saveTimeBtn");
+    const mainStatusLEDModeInput = document.getElementById("mainStatusLEDModeInput");
     // save main config button
     const saveMainConfigBtn = document.getElementById("saveMainConfigBtn");
     
@@ -107,6 +108,11 @@ document.addEventListener("DOMContentLoaded", function() {
             console.log(`save datetime ${JSON.stringify(manualDateTimeVal)}`);
             wsMod.saveDateTime(ws, manualDateTimeVal);
         }
+    });
+
+    // change eventListener for mainStatusLEDModeInput
+    mainStatusLEDModeInput.addEventListener("change", () => {
+        mainConfig.ledSetting = mainStatusLEDModeInput.value;
     });
 
     // click eventlistener for saveMainConfigBtn
@@ -271,6 +277,7 @@ document.addEventListener("DOMContentLoaded", function() {
         name: "",
         ntpEnabledSetting: false, 
         gmtOffsetSetting: 0,
+        ledSetting: 0,
     };
     // current relay index
     let curIndex;
@@ -406,6 +413,7 @@ document.addEventListener("DOMContentLoaded", function() {
         gmtOffsetInput.value = mainConfig["gmtOffsetSetting"];
         // set visible div based on NTP enabled value
         updateNtpEnableDivDisplay();
+        mainStatusLEDModeInput.value = mainConfig["ledSetting"];
     }
 
     /**

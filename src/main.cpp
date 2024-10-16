@@ -18,12 +18,16 @@ make the UI more user friendly, such as greying out the save button until a
 /*
 hardware pins
 */ 
+const int wifiResetBtnPin = 27;
+const int statusLED1Pin = LED_BUILTIN;
 const int ledPins[NUMBER_OF_RELAYS] = {18,19,5};
 const int buttonPins[NUMBER_OF_RELAYS] = {4,23,15};
 const int relayPins[NUMBER_OF_RELAYS] = {13,12,14};
 /*
 hardware components
 */
+LED mainStatusLED(statusLED1Pin);
+Button wifiResetBtn(wifiResetBtnPin);
 LED statusLEDs[NUMBER_OF_RELAYS] = {LED(ledPins[0]), LED(ledPins[1]), LED(ledPins[2])};
 Button buttons[NUMBER_OF_RELAYS] = {Button(buttonPins[0]), Button(buttonPins[1]), Button(buttonPins[2])};
 Relay relays[NUMBER_OF_RELAYS] = {Relay(relayPins[0]), Relay(relayPins[1]), Relay(relayPins[2])};
@@ -100,9 +104,22 @@ void checkRelaysIfOn() {
     } 
   }
 }
-
+/*
+if mode is blinking
+*/
 // function in loop to set the status LED mode.
 void setStatusLEDs() {
+  switch (eC.getMainLEDSetting()) {
+    case LED_ON:
+      mainStatusLED.on();
+      break;
+    case LED_BLINK:
+      mainStatusLED.blink(3000, 0.08);
+      break;
+    default:
+      mainStatusLED.off();
+      break;
+  }
   for (int i=0;i<NUMBER_OF_RELAYS;i++) {
     switch (eC.getLEDSetting(i))
     {
@@ -110,6 +127,7 @@ void setStatusLEDs() {
       statusLEDs[i].on();
       break;
     case LED_BLINK:
+
       statusLEDs[i].blink(3000, 0.08);
       break;
     default:
@@ -150,6 +168,16 @@ void buttonToggleRelay(int index) {
   eC.saveRelayConfig(index);
 }
 
+void buttonToggleMainStatusLED(int i) {
+  if (eC.getMainLEDSetting() < 2) {
+    eC.setMainLEDSetting(eC.getMainLEDSetting() + 1);
+  } else {
+    eC.setMainLEDSetting(0);
+  }
+  eC.saveMainConfig();
+  Serial.printf("button set main status LED to %d\n", eC.getMainLEDSetting());
+}
+
 /*
 callback function to toggle the automatic timer when button is double pressed
 */
@@ -159,9 +187,11 @@ void buttonToggleOperationMode(int index) {
   } else {
     eC.setOperationMode(index, 0);
   }
-  eC.saveRelayConfig(index);
+  eC.save();
+  // Serial.printf("button set operation mode to %d\n", eC.getOperationMode(index));
   statusLEDs[index].startTimer(1000*eC.getOperationMode(index), true);
   statusLEDs[index].blink(1000, 0.5);
+  // eC.load();
   Serial.printf("button set operation mode to %d\n", eC.getOperationMode(index));
 }
 
@@ -169,7 +199,7 @@ void buttonToggleOperationMode(int index) {
 callback function to write default wifi credential values to the EEPROM when 
 the button is long pressed.
 */
-void buttonResetWiFi() {
+void buttonResetWiFi(int i) {
   resetWiFi = true;
   resetWiFiBlinkLED = true;
   resetWiFiTime = millis();
@@ -181,8 +211,8 @@ Loop function to reset the wifi credential values when requested.
 */
 void checkToResetWiFi() {
   if (resetWiFiBlinkLED) {
-    statusLEDs[0].startTimer(2000, true);
-    statusLEDs[0].blink(800, 0.5);
+    mainStatusLED.startTimer(2000, true);
+    mainStatusLED.blink(800, 0.5);
     resetWiFiBlinkLED = false;
   }
 
@@ -241,6 +271,11 @@ void setup() {
     Serial.println("An error occured while mounting LittleFS.");
   }
 
+  mainStatusLED.begin();
+  wifiResetBtn.begin();
+  wifiResetBtn.setIndex(4);
+  wifiResetBtn.setShortPressFunc(buttonToggleMainStatusLED);
+  wifiResetBtn.setLongPressFunc(buttonResetWiFi);
   for (int i=0;i<NUMBER_OF_RELAYS;i++) {
     // init status LED
     statusLEDs[i].begin();
@@ -288,6 +323,8 @@ void setup() {
 }
 
 void loop() {
+  mainStatusLED.loop();
+  wifiResetBtn.loop();
   // start concurrent loops
   for (int i=0;i<NUMBER_OF_RELAYS;i++) {
     statusLEDs[i].loop();

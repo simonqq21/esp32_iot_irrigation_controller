@@ -97,6 +97,7 @@ from ESP32 to browser
         name: string,
         ntpEnabledSetting: bool,
         gmtOffsetSetting: int, 
+        ledSetting: int,
     },
 }
 
@@ -211,6 +212,7 @@ from browser to ESP32
         name: string,
         ntpEnabledSetting: bool,
         gmtOffsetSetting: int, 
+        ledSetting: int,
     },
 }
 
