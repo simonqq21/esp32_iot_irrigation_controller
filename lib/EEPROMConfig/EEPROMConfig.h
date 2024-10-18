@@ -6,6 +6,11 @@
 #include <time.h>
 #include <SPI.h>
 
+const int RELAY_DISABLED = 0; 
+const int RELAY_MANUAL = 1;
+const int RELAY_TIMESLOTS = 2;
+const int RELAY_COUNTDOWN = 3;
+
 #define NUMBER_OF_TIMESLOTS 4
 #define SSID_LENGTH 32
 #define PASS_LENGTH 32 

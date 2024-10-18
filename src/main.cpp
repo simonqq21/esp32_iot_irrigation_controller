@@ -72,13 +72,13 @@ void checkRelaysIfOn() {
   for (int i=0;i<NUMBER_OF_RELAYS;i++) {
     switch (eC.getOperationMode(i)) {
       // manual mode
-      case 1:
+      case RELAY_MANUAL:
         newRelayStates[i] = eC.getRelayManualSetting(i);
         // Serial.printf("newRelayState=%d\n", newRelayState);
         break;
       // if automatic timer is enabled, check all timeslots if any one of them is on
       // in the current time.
-      case 2:
+      case RELAY_TIMESLOTS:
         if (millis() - lastTimesTimeSlotsChecked[i] >= 500) {
           lastTimesTimeSlotsChecked[i] = millis();
           dtnow = rtcntp.getRTCTime();
@@ -86,7 +86,7 @@ void checkRelaysIfOn() {
         }
         break;
       // countdown timer mode
-      case 3:
+      case RELAY_COUNTDOWN:
         if (millis() - lastTimesTimeSlotsChecked[i] >= 50) {
           lastTimesTimeSlotsChecked[i] = millis();
           newRelayStates[i] = eC.checkCountdownTimer(i);
@@ -105,9 +105,31 @@ void checkRelaysIfOn() {
     } 
   }
 }
-/*
-if mode is blinking
-*/
+
+/**
+ * Flash n times on statusLED(ledIndex)
+ */
+void flashOpModeOnLED(LED led, int numFlashes) {
+  led.setLoopUnitDuration(100);
+  bool loopseq[MAX_SEQUENCE_LENGTH];
+  int i=0;
+  for (int j=0;j<3;j++) {
+    if (j<numFlashes) loopseq[i] = 1;
+    else loopseq[i] = 0; 
+    i++;
+    for (int k=0;k<3;k++) {
+      loopseq[i] = 0;
+      i++;
+    }
+  }
+  for (int j=0;j<38;j++) { 
+    loopseq[i] = 0;
+    i++;
+  }
+  led.setLoopSequence(loopseq, i);
+  led.startLoop();
+}
+
 // function in loop to set the status LED mode.
 void setStatusLEDs() {
   switch (eC.getMainLEDSetting()) {
@@ -128,8 +150,22 @@ void setStatusLEDs() {
       statusLEDs[i].on();
       break;
     case LED_BLINK:
+      if (statusLEDs[i].getMode() != LED_LOOP)
+        flashOpModeOnLED(statusLEDs[i], eC.getOperationMode(i));
+      // switch (eC.getOperationMode(i)) {
+      //   case (RELAY_MANUAL):
+          
+      //     break;
+      //   case (RELAY_TIMESLOTS): 
 
-      statusLEDs[i].blink(3000, 0.08);
+      //     break;
+      //   case (RELAY_COUNTDOWN): 
+
+      //     break;
+      //   default: 
+
+      // }
+      // statusLEDs[i].blink(3000, 0.08);
       break;
     default:
       statusLEDs[i].off();

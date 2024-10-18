@@ -9,6 +9,10 @@ void LED::begin() {
     pinMode(_pin, OUTPUT);
 }
 
+int LED::getMode() {
+    return _ledMode;
+}
+
 void LED::loop() {
     if (_timerOn && millis() - _lastTimeTimerSet >= _onDuration) {
         _ledMode = LED_OFF;
@@ -40,6 +44,19 @@ void LED::loop() {
         if (!_ledASet) {
             analogWrite(_pin, _curLEDAnalogVal);
             _ledASet = true;
+        }
+        break;
+    case LED_LOOP:
+        if (millis() - _previousMillis > _loopUnitDuration) {
+            _previousMillis = millis();
+            _nextLEDDigitalVal = _loopSequence[_curLoopSequencePos];
+            // Serial.printf("step %d\n", _loopSequence[_curLoopSequencePos]);
+            // Serial.printf("%d, %d\n", _nextLEDDigitalVal, _curLEDDigitalVal);
+            if (_curLoopSequencePos < _loopSequenceLength-1) {
+                _curLoopSequencePos++;
+            } else {
+                _curLoopSequencePos = 0;
+            }
         }
         break;
     default:
@@ -147,4 +164,18 @@ void LED::startTimer(int milliseconds, bool resumePreviousMode) {
     else {
         _timerOn = false;
     }
+}
+
+void LED::setLoopSequence(bool loopSequence[], unsigned int loopSequenceLength) {
+    _loopSequenceLength = loopSequenceLength;
+    for (int i=0;i< _loopSequenceLength;i++) {
+        _loopSequence[i] = loopSequence[i];
+    }
+}
+void LED::setLoopUnitDuration(unsigned int LoopUnitDuration) {
+    _loopUnitDuration = LoopUnitDuration;
+}
+void LED::startLoop() {
+    _ledMode = LED_LOOP;
+    _curLoopSequencePos = 0;
 }
