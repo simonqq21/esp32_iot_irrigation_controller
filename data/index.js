@@ -43,6 +43,9 @@ document.addEventListener("DOMContentLoaded", function() {
     // save main config button
     const saveMainConfigBtn = document.getElementById("saveMainConfigBtn");
     
+    // all mainConfig inputs 
+    const mainConfigInputs = document.querySelectorAll(".mainConfigInput");
+
     // relay index selector
     const relayIndexSelector = document.getElementById("relayIndexSelector");
     // status LED mode input
@@ -71,6 +74,9 @@ document.addEventListener("DOMContentLoaded", function() {
         const countdownStartStopButton = document.getElementById("startStopCountdownButton");
     // save relay config for the selected relay index
     const saveRelayConfigBtn = document.getElementById('saveRelayConfigBtn');
+
+    // all relayConfig inputs 
+    const relayConfigInputs = document.querySelectorAll(".relayConfigInput");
 
     /*
     Input eventListeners
@@ -118,8 +124,17 @@ document.addEventListener("DOMContentLoaded", function() {
     // click eventlistener for saveMainConfigBtn
     saveMainConfigBtn.addEventListener('click', () => {
         wsMod.saveMainConfig(ws, mainConfig);
+        // disable main config button after saving
+        saveMainConfigBtn.disabled = true;
         console.log(JSON.stringify(mainConfig));
         console.log("saved main config");
+    });
+
+    // enable the save main config button if any main config is modified.
+    mainConfigInputs.forEach(element => {
+        element.addEventListener("change", () => {
+            saveMainConfigBtn.disabled = false;
+        });
     });
 
     // change eventlistener for relay index selector
@@ -256,7 +271,16 @@ document.addEventListener("DOMContentLoaded", function() {
         // current relay index value
         console.log(`curindex=${curIndex}`);
         wsMod.saveRelayConfigs(ws, relayConfigs[curIndex]);
+        // disable relay config button after saving
+        saveRelayConfigBtn.disabled = true;
         console.log("save relay config");
+    });
+
+    // enable the save relay config button if any relay config is modified.
+    relayConfigInputs.forEach(element => {
+        element.addEventListener("change", () => {
+            saveRelayConfigBtn.disabled = false;
+        });
     });
 
 
@@ -581,6 +605,9 @@ document.addEventListener("DOMContentLoaded", function() {
         }
     }
 
+    // disable save main config button and save relay config button upon startup
+    saveMainConfigBtn.disabled = true;
+    saveRelayConfigBtn.disabled = true;
     // initws
     initWS();
     // update all visible divs on page load
