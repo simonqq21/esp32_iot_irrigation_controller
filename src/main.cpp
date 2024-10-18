@@ -52,6 +52,7 @@ unsigned long resetWiFiTime;
 // send the time once a second
 unsigned long sendTimeInterval = 1000;
 unsigned long lastTimeTimeSent;
+int curOperationModes[NUMBER_OF_RELAYS];
 /*
 If NTP update is called at the same time as the websocket sending data to the ESP32 when there is
 no access to the NTP server, such as when the configuration is saved with NTP enabled through a 
@@ -109,8 +110,8 @@ void checkRelaysIfOn() {
 /**
  * Flash n times on statusLED(ledIndex)
  */
-void flashOpModeOnLED(LED led, int numFlashes) {
-  led.setLoopUnitDuration(100);
+void flashOpModeOnLED(LED *led, int numFlashes) {
+  led->setLoopUnitDuration(100);
   bool loopseq[MAX_SEQUENCE_LENGTH];
   int i=0;
   for (int j=0;j<3;j++) {
@@ -126,8 +127,9 @@ void flashOpModeOnLED(LED led, int numFlashes) {
     loopseq[i] = 0;
     i++;
   }
-  led.setLoopSequence(loopseq, i);
-  led.startLoop();
+  led->setLoopSequence(loopseq, i);
+  Serial.println("start loop");
+  led->startLoop();
 }
 
 // function in loop to set the status LED mode.
@@ -150,8 +152,12 @@ void setStatusLEDs() {
       statusLEDs[i].on();
       break;
     case LED_BLINK:
-      if (statusLEDs[i].getMode() != LED_LOOP)
-        flashOpModeOnLED(statusLEDs[i], eC.getOperationMode(i));
+      if (statusLEDs[i].getMode() != LED_LOOP || eC.getOperationMode(i) != curOperationModes[i]) {
+        curOperationModes[i] = eC.getOperationMode(i);
+        Serial.printf("blinking %d\n", statusLEDs[i].getMode());
+        flashOpModeOnLED(&statusLEDs[i], eC.getOperationMode(i));
+      }
+        
       // switch (eC.getOperationMode(i)) {
       //   case (RELAY_MANUAL):
           
@@ -169,7 +175,6 @@ void setStatusLEDs() {
       break;
     default:
       statusLEDs[i].off();
-      break;
     }
   }
 }
