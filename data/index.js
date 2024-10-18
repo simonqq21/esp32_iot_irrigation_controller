@@ -8,8 +8,8 @@ document.addEventListener("DOMContentLoaded", function() {
     let port;
     if (window.location.hostname == "localhost") {
         // hostname = "192.168.57.70";
-        // hostname = "192.168.5.70";
-        hostname = "192.168.4.1";
+        hostname = "192.168.5.80";
+        // hostname = "192.168.4.1";
         port = 7777;
     }
     else {
@@ -131,11 +131,13 @@ document.addEventListener("DOMContentLoaded", function() {
     });
 
     // enable the save main config button if any main config is modified.
-    mainConfigInputs.forEach(element => {
-        element.addEventListener("change", () => {
-            saveMainConfigBtn.disabled = false;
+    function enableSaveMainConfigBtnOnModify() {
+        mainConfigInputs.forEach(element => {
+            element.addEventListener("change", () => {
+                saveMainConfigBtn.disabled = false;
+            });
         });
-    });
+    }
 
     // change eventlistener for relay index selector
     relayIndexSelector.addEventListener("change", () => {
@@ -186,6 +188,26 @@ document.addEventListener("DOMContentLoaded", function() {
         if endTime is updated, calculate for duration.
         if duration is updated, calculate for endTime.
         */
+        timeSlotsEnableds.forEach(element => {  
+            element.addEventListener("change", () => {
+                saveRelayConfigBtn.disabled = false;
+            });
+        });
+        timeSlotsStartTimes.forEach(element => {  
+            element.addEventListener("change", () => {
+                saveRelayConfigBtn.disabled = false;
+            });
+        });
+        timeSlotsEndTimes.forEach(element => {  
+            element.addEventListener("change", () => {
+                saveRelayConfigBtn.disabled = false;
+            });
+        });
+        timeSlotsDurations.forEach(element => {  
+            element.addEventListener("change", () => {
+                saveRelayConfigBtn.disabled = false;
+            });
+        });
        let events = ["change", "click"];
        for (const event of events) {
             // set the change eventListeners for enabled input of each timeSlot
@@ -200,16 +222,16 @@ document.addEventListener("DOMContentLoaded", function() {
             // set the change eventListeners for startTime of each timeSlot
             timeSlotsStartTimes.forEach(element => {
                 element.addEventListener(event, () => {
-                let tsIndex = element.dataset.tsIndex;
-                relayConfigs[curIndex].timeSlots[tsIndex].onStartTime = element.value + "Z";
-                relayConfigs[curIndex].timeSlots[tsIndex].duration = calculateDuration(
-                    relayConfigs[curIndex].timeSlots[tsIndex].onStartTime,
-                    relayConfigs[curIndex].timeSlots[tsIndex].onEndTime
-                );
-                console.log(relayConfigs[curIndex].timeSlots[tsIndex].duration);
-                element.parentElement.parentElement.getElementsByClassName("timeSlotDuration")[0]
-                    .value = relayConfigs[curIndex].timeSlots[tsIndex].duration;
-                // console.log(JSON.stringify(config));
+                    let tsIndex = element.dataset.tsIndex;
+                    relayConfigs[curIndex].timeSlots[tsIndex].onStartTime = element.value + "Z";
+                    relayConfigs[curIndex].timeSlots[tsIndex].duration = calculateDuration(
+                        relayConfigs[curIndex].timeSlots[tsIndex].onStartTime,
+                        relayConfigs[curIndex].timeSlots[tsIndex].onEndTime
+                    );
+                    console.log(relayConfigs[curIndex].timeSlots[tsIndex].duration);
+                    element.parentElement.parentElement.getElementsByClassName("timeSlotDuration")[0]
+                        .value = relayConfigs[curIndex].timeSlots[tsIndex].duration;
+                    // console.log(JSON.stringify(config));
                 });
             });
             // set the change eventListeners for endTime of each timeSlot
@@ -224,7 +246,7 @@ document.addEventListener("DOMContentLoaded", function() {
                     console.log(relayConfigs[curIndex].timeSlots[tsIndex].duration);
                     element.parentElement.parentElement.getElementsByClassName("timeSlotDuration")[0]
                         .value = relayConfigs[curIndex].timeSlots[tsIndex].duration;
-                    // console.log(JSON.stringify(config)); 
+                    // console.log(JSON.stringify(config));
                 });
             });
             // set the change eventListeners for duration of each timeSlot
@@ -277,11 +299,15 @@ document.addEventListener("DOMContentLoaded", function() {
     });
 
     // enable the save relay config button if any relay config is modified.
-    relayConfigInputs.forEach(element => {
-        element.addEventListener("change", () => {
-            saveRelayConfigBtn.disabled = false;
+    function enableSaveRelayConfigBtnOnModify() {
+        relayConfigInputs.forEach(element => {
+            element.addEventListener("change", () => {
+                saveRelayConfigBtn.disabled = false;
+            });
         });
-    });
+    }
+    
+    
 
 
 
@@ -605,6 +631,8 @@ document.addEventListener("DOMContentLoaded", function() {
         }
     }
 
+    enableSaveMainConfigBtnOnModify();
+    enableSaveRelayConfigBtnOnModify();
     // disable save main config button and save relay config button upon startup
     saveMainConfigBtn.disabled = true;
     saveRelayConfigBtn.disabled = true;
