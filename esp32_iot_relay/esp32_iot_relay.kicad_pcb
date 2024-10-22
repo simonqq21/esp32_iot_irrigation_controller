@@ -1029,7 +1029,7 @@
 		(descr "Through hole straight pin header, 1x02, 2.54mm pitch, single row")
 		(tags "Through hole pin header THT 1x02 2.54mm single row")
 		(property "Reference" "J4"
-			(at 0 -2.33 360)
+			(at 0 -2.33 0)
 			(layer "F.SilkS")
 			(uuid "9cc04bf1-e163-4d97-969d-5b5c49830b2f")
 			(effects
@@ -1040,7 +1040,7 @@
 			)
 		)
 		(property "Value" "reset_header"
-			(at 0 4.87 360)
+			(at 0 4.87 0)
 			(layer "F.Fab")
 			(uuid "4de892aa-f0d6-46c8-a807-38d3a9c3e1dd")
 			(effects
@@ -2008,7 +2008,7 @@
 		(descr "LED, diameter 5.0mm, 2 pins, http://cdn-reichelt.de/documents/datenblatt/A500/LL-504BC2E-009.pdf")
 		(tags "LED diameter 5.0mm 2 pins")
 		(property "Reference" "D4"
-			(at 1.27 -3.96 360)
+			(at 1.27 -3.96 0)
 			(layer "F.SilkS")
 			(uuid "14094290-e270-4157-852e-d2cf9fb995e2")
 			(effects
@@ -2019,7 +2019,7 @@
 			)
 		)
 		(property "Value" "LED"
-			(at 1.27 3.96 360)
+			(at 1.27 3.96 0)
 			(layer "F.Fab")
 			(uuid "2ade9a67-ac0e-4b94-abaa-abdf6a3ff0d8")
 			(effects
@@ -2189,7 +2189,7 @@
 			(uuid "9c2fc310-a13f-4461-90ef-6e88bda23044")
 		)
 		(fp_text user "${REFERENCE}"
-			(at 1.25 0 360)
+			(at 1.25 0 0)
 			(layer "F.Fab")
 			(uuid "62830dbc-126b-4517-bc2b-c459fd1c4b4f")
 			(effects
@@ -3175,45 +3175,6 @@
 				)
 			)
 		)
-		(property "Description" "RF Module, ESP32-D0WDQ6 SoC, Wi-Fi 802.11b/g/n, Bluetooth, BLE, 32-bit, 2.7-3.6V, onboard antenna, SMD"
-			(at 6 1.3 0)
-			(unlocked yes)
-			(layer "F.Fab")
-			(hide yes)
-			(uuid "0cddb3bd-d19f-4624-b653-c02a4d67560d")
-			(effects
-				(font
-					(size 1 1)
-					(thickness 0.15)
-				)
-			)
-		)
-		(property "Footprint" "microcontroller_headers:esp32_doit_devkitv1"
-			(at 6 1.3 0)
-			(unlocked yes)
-			(layer "F.Fab")
-			(hide yes)
-			(uuid "f61bb0e1-c43d-44ae-9651-19d4864d67ab")
-			(effects
-				(font
-					(size 1 1)
-					(thickness 0.15)
-				)
-			)
-		)
-		(property "Datasheet" "https://www.espressif.com/sites/default/files/documentation/esp32-wroom-32_datasheet_en.pdf"
-			(at 6 1.3 0)
-			(unlocked yes)
-			(layer "F.Fab")
-			(hide yes)
-			(uuid "e98e5043-43fe-43f4-99aa-fde2e53a181e")
-			(effects
-				(font
-					(size 1 1)
-					(thickness 0.15)
-				)
-			)
-		)
 		(property ki_fp_filters "ESP32?WROOM?32*")
 		(path "/0b7f4469-ac4d-4178-8d8e-80ef11daae4e")
 		(sheetname "Root")
@@ -3734,7 +3695,7 @@
 		(descr "tactile push button, 6x6mm e.g. PHAP33xx series, height=5mm")
 		(tags "tact sw push 6mm")
 		(property "Reference" "SW4"
-			(at 3.25 -2 360)
+			(at 3.25 -2 0)
 			(layer "F.SilkS")
 			(uuid "7d1270c8-f39e-4202-9073-3e17f69d0958")
 			(effects
@@ -3745,7 +3706,7 @@
 			)
 		)
 		(property "Value" "SW_Push"
-			(at 3.75 6.7 360)
+			(at 3.75 6.7 0)
 			(layer "F.Fab")
 			(uuid "adc23cc7-7ab1-49f4-b805-0086095a6bac")
 			(effects
@@ -4020,7 +3981,7 @@
 			(uuid "68983f04-c510-4dc6-8b77-f748ad03d117")
 		)
 		(fp_text user "${REFERENCE}"
-			(at 3.25 2.25 360)
+			(at 3.25 2.25 0)
 			(layer "F.Fab")
 			(uuid "52f829bb-1e46-465c-b437-db56fe367fcb")
 			(effects
@@ -4093,7 +4054,7 @@
 		(descr "LED, diameter 5.0mm, 2 pins, http://cdn-reichelt.de/documents/datenblatt/A500/LL-504BC2E-009.pdf")
 		(tags "LED diameter 5.0mm 2 pins")
 		(property "Reference" "D2"
-			(at 1.27 -3.96 360)
+			(at 1.27 -3.96 0)
 			(layer "F.SilkS")
 			(uuid "e75172ee-013c-4520-8541-baa41b5b65be")
 			(effects
@@ -4104,7 +4065,7 @@
 			)
 		)
 		(property "Value" "LED"
-			(at 1.27 3.96 360)
+			(at 1.27 3.96 0)
 			(layer "F.Fab")
 			(uuid "1967c640-c060-4a65-821f-0fefb7a2a3bc")
 			(effects
@@ -4274,7 +4235,7 @@
 			(uuid "bd283799-8d64-4d55-88d6-030a40d5f3d6")
 		)
 		(fp_text user "${REFERENCE}"
-			(at 1.25 0 360)
+			(at 1.25 0 0)
 			(layer "F.Fab")
 			(uuid "5f7d712a-1768-4ca5-ae63-c16913510c6e")
 			(effects
@@ -4325,7 +4286,7 @@
 		(descr "LED, diameter 5.0mm, 2 pins, http://cdn-reichelt.de/documents/datenblatt/A500/LL-504BC2E-009.pdf")
 		(tags "LED diameter 5.0mm 2 pins")
 		(property "Reference" "D3"
-			(at 1.27 -3.96 360)
+			(at 1.27 -3.96 0)
 			(layer "F.SilkS")
 			(uuid "44548665-f84f-4826-8d04-0c2cdb73164a")
 			(effects
@@ -4336,7 +4297,7 @@
 			)
 		)
 		(property "Value" "LED"
-			(at 1.27 3.96 360)
+			(at 1.27 3.96 0)
 			(layer "F.Fab")
 			(uuid "be489c7e-dbc6-4ad4-95ae-d583fffc84a9")
 			(effects
@@ -4506,7 +4467,7 @@
 			(uuid "bc81841d-958e-4d0c-891e-157b5f7221bb")
 		)
 		(fp_text user "${REFERENCE}"
-			(at 1.25 0 360)
+			(at 1.25 0 0)
 			(layer "F.Fab")
 			(uuid "f7732c4f-370b-4ba1-892b-3a3da99a1a34")
 			(effects
@@ -4557,7 +4518,7 @@
 		(descr "LED, diameter 5.0mm, 2 pins, http://cdn-reichelt.de/documents/datenblatt/A500/LL-504BC2E-009.pdf")
 		(tags "LED diameter 5.0mm 2 pins")
 		(property "Reference" "D1"
-			(at 1.27 -3.96 360)
+			(at 1.27 -3.96 0)
 			(layer "F.SilkS")
 			(uuid "692c9b1a-dcdb-4aad-842f-5ecf455e3c83")
 			(effects
@@ -4568,7 +4529,7 @@
 			)
 		)
 		(property "Value" "LED"
-			(at 1.27 3.96 360)
+			(at 1.27 3.96 0)
 			(layer "F.Fab")
 			(uuid "be4192cb-018f-4843-9035-cecea23c8e75")
 			(effects
@@ -4738,7 +4699,7 @@
 			(uuid "ab28bf67-df93-43fd-89b6-e52eb647456f")
 		)
 		(fp_text user "${REFERENCE}"
-			(at 1.25 0 360)
+			(at 1.25 0 0)
 			(layer "F.Fab")
 			(uuid "92004e45-1407-4b9f-b10a-7baa6501a882")
 			(effects
@@ -5415,5 +5376,27 @@
 				(xyz 0 0 0)
 			)
 		)
+	)
+	(gr_rect
+		(start 202.5 63.5)
+		(end 280.5 114.5)
+		(stroke
+			(width 0.05)
+			(type default)
+		)
+		(fill none)
+		(layer "Edge.Cuts")
+		(uuid "ab40b147-3ee3-4d36-bef9-7532b82b259e")
+	)
+	(gr_rect
+		(start 202 21)
+		(end 266.5 48)
+		(stroke
+			(width 0.05)
+			(type default)
+		)
+		(fill none)
+		(layer "Edge.Cuts")
+		(uuid "d962c796-459d-4086-b4fe-656497e0a933")
 	)
 )
