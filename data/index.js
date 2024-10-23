@@ -431,14 +431,17 @@ document.addEventListener("DOMContentLoaded", function() {
                 relayStatusText.textContent = "On";
                 relayStatusIndicator.classList.add("on");
                 relayStatusIndicator.classList.remove("off");
-                countdownStartStopButton.textContent = "Stop";
             }
             else {
                 relayStatusText.textContent = "Off";
                 relayStatusIndicator.classList.add("off");
                 relayStatusIndicator.classList.remove("on");
-                countdownStartStopButton.textContent = "Start";
             } 
+        }
+        if (payload["relay_states"][curIndex]) {
+            countdownStartStopButton.textContent = "Stop";
+        } else {
+            countdownStartStopButton.textContent = "Start";
         }
     }
 
