@@ -80,6 +80,7 @@
 		)
 		(pad_to_mask_clearance 0)
 		(allow_soldermask_bridges_in_footprints no)
+		(grid_origin 80 90)
 		(pcbplotparams
 			(layerselection 0x00010fc_ffffffff)
 			(plot_on_all_layers_selection 0x0000000_00000000)
@@ -156,6 +157,7 @@
 		(property "Reference" "REF**"
 			(at 0 -4.2 90)
 			(layer "F.SilkS")
+			(hide yes)
 			(uuid "5787c80c-a77b-456d-9b38-3e510da7ab6a")
 			(effects
 				(font
@@ -167,6 +169,7 @@
 		(property "Value" "MountingHole_3.2mm_M3"
 			(at 0 4.2 90)
 			(layer "F.Fab")
+			(hide yes)
 			(uuid "83dd4b01-dddc-4e93-abf0-3f2b38d5bfdf")
 			(effects
 				(font
@@ -532,6 +535,7 @@
 		(property "Reference" "REF**"
 			(at 0 -4.2 90)
 			(layer "F.SilkS")
+			(hide yes)
 			(uuid "ed36457a-f4ed-4cef-91d6-0fa5808850a9")
 			(effects
 				(font
@@ -543,6 +547,7 @@
 		(property "Value" "MountingHole_3.2mm_M3"
 			(at 0 4.2 90)
 			(layer "F.Fab")
+			(hide yes)
 			(uuid "12363344-5347-4591-9526-d4ae10a31fd5")
 			(effects
 				(font
@@ -1786,6 +1791,7 @@
 		(property "Reference" "REF**"
 			(at 0 -4.2 0)
 			(layer "F.SilkS")
+			(hide yes)
 			(uuid "ea798c7a-d220-42e7-b8eb-f224671c8f91")
 			(effects
 				(font
@@ -1797,6 +1803,7 @@
 		(property "Value" "MountingHole_3.2mm_M3"
 			(at 0 4.2 0)
 			(layer "F.Fab")
+			(hide yes)
 			(uuid "dc85edee-5546-4b68-8998-b6e02d071398")
 			(effects
 				(font
@@ -2206,6 +2213,7 @@
 		(property "Reference" "REF**"
 			(at 0 -4.2 0)
 			(layer "F.SilkS")
+			(hide yes)
 			(uuid "02a010e0-1e5d-4fff-b4af-91832c0a6be1")
 			(effects
 				(font
@@ -2217,6 +2225,7 @@
 		(property "Value" "MountingHole_3.2mm_M3"
 			(at 0 4.2 0)
 			(layer "F.Fab")
+			(hide yes)
 			(uuid "4809a1a4-1742-46f7-9836-10783cf1bce6")
 			(effects
 				(font
@@ -2316,6 +2325,138 @@
 		(fill none)
 		(layer "Edge.Cuts")
 		(uuid "b88f3ddc-29a5-4acd-a68c-4fc515301bea")
+	)
+	(dimension
+		(type aligned)
+		(layer "Dwgs.User")
+		(uuid "17f611e5-1fd4-45ce-b216-8bb6b01a7929")
+		(pts
+			(xy 144.95 136.5) (xy 141.5 136.5)
+		)
+		(height -8)
+		(gr_text "3.4500 mm"
+			(at 143.225 143.35 0)
+			(layer "Dwgs.User")
+			(uuid "17f611e5-1fd4-45ce-b216-8bb6b01a7929")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(format
+			(prefix "")
+			(suffix "")
+			(units 3)
+			(units_format 1)
+			(precision 4)
+		)
+		(style
+			(thickness 0.1)
+			(arrow_length 1.27)
+			(text_position_mode 0)
+			(extension_height 0.58642)
+			(extension_offset 0.5) keep_text_aligned)
+	)
+	(dimension
+		(type aligned)
+		(layer "Dwgs.User")
+		(uuid "1c1dd00a-e826-4d95-8c72-5c4439912e19")
+		(pts
+			(xy 141.5 136.5) (xy 141.5 139.95)
+		)
+		(height -10.5)
+		(gr_text "3.4500 mm"
+			(at 150.85 138.225 90)
+			(layer "Dwgs.User")
+			(uuid "1c1dd00a-e826-4d95-8c72-5c4439912e19")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(format
+			(prefix "")
+			(suffix "")
+			(units 3)
+			(units_format 1)
+			(precision 4)
+		)
+		(style
+			(thickness 0.1)
+			(arrow_length 1.27)
+			(text_position_mode 0)
+			(extension_height 0.58642)
+			(extension_offset 0.5) keep_text_aligned)
+	)
+	(dimension
+		(type aligned)
+		(layer "Dwgs.User")
+		(uuid "8e07073e-6a94-46ef-982e-7c6083c08e36")
+		(pts
+			(xy 80 90) (xy 80 140)
+		)
+		(height 7)
+		(gr_text "50.0000 mm"
+			(at 71.85 115 90)
+			(layer "Dwgs.User")
+			(uuid "8e07073e-6a94-46ef-982e-7c6083c08e36")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(format
+			(prefix "")
+			(suffix "")
+			(units 3)
+			(units_format 1)
+			(precision 4)
+		)
+		(style
+			(thickness 0.1)
+			(arrow_length 1.27)
+			(text_position_mode 0)
+			(extension_height 0.58642)
+			(extension_offset 0.5) keep_text_aligned)
+	)
+	(dimension
+		(type aligned)
+		(layer "Dwgs.User")
+		(uuid "ad2b2b3d-6b71-4096-8673-f9e07c769b9d")
+		(pts
+			(xy 145 140) (xy 80 140)
+		)
+		(height -6.5)
+		(gr_text "65.0000 mm"
+			(at 112.5 145.35 0)
+			(layer "Dwgs.User")
+			(uuid "ad2b2b3d-6b71-4096-8673-f9e07c769b9d")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(format
+			(prefix "")
+			(suffix "")
+			(units 3)
+			(units_format 1)
+			(precision 4)
+		)
+		(style
+			(thickness 0.1)
+			(arrow_length 1.27)
+			(text_position_mode 0)
+			(extension_height 0.58642)
+			(extension_offset 0.5) keep_text_aligned)
 	)
 	(segment
 		(start 102.2 100.04)
