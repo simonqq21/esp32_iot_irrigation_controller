@@ -9,11 +9,8 @@
 #include "esp_websocket_client.h"
 
 /*
-TODO for v3:
-add method to LED to play a sequence of bools over a certain span of time in a cycle
-Use that method to blink out the LED state on the status LEDs
-make the UI more user friendly, such as greying out the save button until a 
-setting has been changed.
+TODO: 
+    add a time remaining countdown beside each relay which appears when countdown mode and relay is activated
 */
 
 /*
@@ -52,6 +49,7 @@ unsigned long resetWiFiTime;
 // send the time once a second
 unsigned long sendTimeInterval = 1000;
 unsigned long lastTimeTimeSent;
+// 
 int curOperationModes[NUMBER_OF_RELAYS];
 /*
 If NTP update is called at the same time as the websocket sending data to the ESP32 when there is
@@ -65,6 +63,7 @@ bool updateNTPFlag = false;
 unsigned long lastTimeUpdateTime;
 // relay state
 bool newRelayStates[NUMBER_OF_RELAYS];
+bool relayStatesForLEDs[NUMBER_OF_RELAYS];
 
 /*
 function in the loop to control the relay.
@@ -109,22 +108,39 @@ void checkRelaysIfOn() {
 
 /**
  * Flash n times on statusLED(ledIndex)
+ * @params
+ * LED* led - pointer to LED 
+ * int numFlashes - number of flashes
+ * bool state - whether the relay is on or off; if the relay is on, the time outside the flashes will be on, but if the
+ *    relay is off, the time outside the flashes will be off.
+ * 
+ * eg. 
+ *  for the LED to blink two times, the sequence to do that is below:
+ *    0000 10001000 xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+ *    Each bit takes 100 ms.
+ *    Initial four 0's
+ *    one 1 and three 0's for each time to blink
+ *    40 bits of the state, where state is the state of the relay.
+ * 
  */
-void flashOpModeOnLED(LED *led, int numFlashes) {
+void flashOpModeOnLED(LED *led, int numFlashes, bool state=0) {
   led->setLoopUnitDuration(100);
   bool loopseq[MAX_SEQUENCE_LENGTH];
   int i=0;
+  for (int j=0;j<4;j++) {
+    loopseq[i] = 0;
+    i++;
+  }
   for (int j=0;j<3;j++) {
-    if (j<numFlashes) loopseq[i] = 1;
-    else loopseq[i] = 0; 
+    loopseq[i] = j<numFlashes;
     i++;
     for (int k=0;k<3;k++) {
       loopseq[i] = 0;
       i++;
     }
   }
-  for (int j=0;j<38;j++) { 
-    loopseq[i] = 0;
+  for (int j=0;j<40;j++) { 
+    loopseq[i] = state;
     i++;
   }
   led->setLoopSequence(loopseq, i);
@@ -134,6 +150,7 @@ void flashOpModeOnLED(LED *led, int numFlashes) {
 
 // function in loop to set the status LED mode.
 void setStatusLEDs() {
+  // main LED code
   switch (eC.getMainLEDSetting()) {
     case LED_ON:
       mainStatusLED.on();
@@ -145,6 +162,7 @@ void setStatusLEDs() {
       mainStatusLED.off();
       break;
   }
+  // relay LED code
   for (int i=0;i<NUMBER_OF_RELAYS;i++) {
     switch (eC.getLEDSetting(i))
     {
@@ -152,26 +170,22 @@ void setStatusLEDs() {
       statusLEDs[i].on();
       break;
     case LED_BLINK:
-      if (statusLEDs[i].getMode() != LED_LOOP || eC.getOperationMode(i) != curOperationModes[i]) {
+      /**
+       * if the LED is not looping yet, or 
+       * if the operation mode has changed, or
+       * if the relay state has changed,
+       * restart the LED sequence loop.
+      */ 
+      if (
+        statusLEDs[i].getMode() != LED_LOOP || 
+        curOperationModes[i] != eC.getOperationMode(i) ||
+        relayStatesForLEDs[i] != relays[i].readState()
+      ) {
         curOperationModes[i] = eC.getOperationMode(i);
-        Serial.printf("blinking %d\n", statusLEDs[i].getMode());
-        flashOpModeOnLED(&statusLEDs[i], eC.getOperationMode(i));
+        relayStatesForLEDs[i] = relays[i].readState();
+        // Serial.printf("blinking %d\n", statusLEDs[i].getMode());
+        flashOpModeOnLED(&statusLEDs[i], eC.getOperationMode(i), relays[i].readState());
       }
-        
-      // switch (eC.getOperationMode(i)) {
-      //   case (RELAY_MANUAL):
-          
-      //     break;
-      //   case (RELAY_TIMESLOTS): 
-
-      //     break;
-      //   case (RELAY_COUNTDOWN): 
-
-      //     break;
-      //   default: 
-
-      // }
-      // statusLEDs[i].blink(3000, 0.08);
       break;
     default:
       statusLEDs[i].off();
