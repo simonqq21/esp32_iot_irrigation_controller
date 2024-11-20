@@ -1,3 +1,12 @@
+/*
+TODO: 
+    change LED behavior to:
+        Off: LED is totally off
+        On: LED is totally on
+        Blinking: LED blinks the current operation mode periodically, but is mostly off when the relay is off 
+            and mostly on when the relay is on.
+    add a time remaining countdown beside each relay which appears when countdown mode and relay is activated
+*/
 import * as wsMod from './wsMod.js';
 
 document.addEventListener("DOMContentLoaded", function() {
@@ -143,6 +152,7 @@ document.addEventListener("DOMContentLoaded", function() {
     relayIndexSelector.addEventListener("change", () => {
         getCurRelayIndex();
         updateRelayConfigsDisplay(curIndex);
+        updateDisplayedRelayStates(null);
     });
 
     // get the current relay index from the relay index selector
@@ -421,13 +431,14 @@ document.addEventListener("DOMContentLoaded", function() {
      * Callback function to update current relay state display and update the text of the start/stop countdown timer button
      */
     function updateDisplayedRelayStates(payload) {
-        curRelayStates = payload;
+        curRelayStates = payload ?? curRelayStates;
         console.log(`new currelays=${JSON.stringify(curRelayStates)}`);
-        for (let i=0;i<3;i++) {
+
+        for (let i=0;i<curRelayStates["relay_states"].length;i++) {
             let relayStatusIndicator = relayStates[i].getElementsByClassName('relayStatusIndicator')[0];
             let relayStatusText = relayStates[i].getElementsByClassName("relayStatusText")[0];
 
-            if (payload["relay_states"][i]) {
+            if (curRelayStates["relay_states"][i]) {
                 relayStatusText.textContent = "On";
                 relayStatusIndicator.classList.add("on");
                 relayStatusIndicator.classList.remove("off");
@@ -438,7 +449,7 @@ document.addEventListener("DOMContentLoaded", function() {
                 relayStatusIndicator.classList.remove("on");
             } 
         }
-        if (payload["relay_states"][curIndex]) {
+        if (curRelayStates["relay_states"][curIndex]) {
             countdownStartStopButton.textContent = "Stop";
         } else {
             countdownStartStopButton.textContent = "Start";
@@ -534,6 +545,7 @@ document.addEventListener("DOMContentLoaded", function() {
         setTimeSlotsCallbacks();
         // get countdown duration value 
         countdownDurationInput.value = relayConfigs[index]["countdownDurationSetting"];
+        
     }
     
     /**
@@ -629,6 +641,7 @@ document.addEventListener("DOMContentLoaded", function() {
                 break;
             case '3':
                 countdownTimerDiv.style.display = "block";
+                
                 break;
             default:
         }
