@@ -9,11 +9,6 @@
 #include "esp_websocket_client.h"
 
 /*
-TODO: 
-    add a time remaining countdown beside each relay which appears when countdown mode and relay is activated
-*/
-
-/*
 hardware pins
 */ 
 const int wifiResetBtnPin = 27;
@@ -64,6 +59,7 @@ unsigned long lastTimeUpdateTime;
 // relay state
 bool newRelayStates[NUMBER_OF_RELAYS];
 bool relayStatesForLEDs[NUMBER_OF_RELAYS];
+unsigned long lastTimeCountDownSent;
 
 /*
 function in the loop to control the relay.
@@ -320,6 +316,19 @@ void sendTime() {
   }
 }
 
+void sendCountDown() {
+  bool anyCountDown = false;
+  for (int i=0;i<NUMBER_OF_RELAYS;i++) {
+    if (eC.getOperationMode(i) == RELAY_COUNTDOWN) anyCountDown = true;
+  }
+  // eC.checkCountdownTimer
+  if (anyCountDown && millis() - lastTimeCountDownSent > 1000) {
+    lastTimeCountDownSent = millis();
+    wsMod.sendCountDownState();
+    Serial.println("countdown sent");
+  }
+}
+
 void setup() {
   Serial.begin(115200);
   // littleFS 
@@ -397,4 +406,5 @@ void loop() {
   sendTime();
 
   updateTimeInLoop();
+  sendCountDown();
 }

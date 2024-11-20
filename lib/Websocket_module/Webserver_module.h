@@ -13,6 +13,11 @@
 #include "Relay.h"
 
 /*
+TODO: 
+    add a time remaining countdown beside each relay which appears when countdown mode and relay is activated
+*/
+
+/*
 Other libraries and modules to include:
 IO module
 RTC module
@@ -121,6 +126,23 @@ from ESP32 to browser
         }
     },
 }
+
+- ESP32 send countdown timer remaining time to the browser
+This message will only be sent if there is one or more countdown timers running.
+{
+    cmd: "load",
+    type: "countdown_timers",
+    payload: {
+        countdown_timers: [
+            {
+                index: int,
+                timeRemaining: int,    
+            },
+            ...
+        ]
+    }
+}
+
 
 
 
@@ -327,6 +349,8 @@ class WebserverModule {
         static void sendDateTime(JsonDocument inputPayloadJSON=JsonDocument());
         static void sendMainConfig(JsonDocument inputPayloadJSON=JsonDocument());
         static void sendRelayConfig(int rIndex, JsonDocument inputPayloadJSON=JsonDocument());
+        static void sendCountDownState(JsonDocument inputPayloadJSON=JsonDocument());
+
         // method to handle requests from the client browser 
         static void handleRequest(String type, JsonDocument payloadJSON); 
         // set callbacks for sending methods

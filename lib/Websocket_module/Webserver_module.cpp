@@ -331,6 +331,26 @@ void WebserverModule::sendRelayConfig(int rIndex, JsonDocument inputPayloadJSON)
     _ws.textAll(_strData);
 }
 
+void WebserverModule::sendCountDownState(JsonDocument inputPayloadJSON) {
+    _jsonDoc.clear();
+    _jsonDoc[CMD_KEY] = LOAD_CMD;
+    _jsonDoc[TYPE_KEY] = "countdown_timers";
+    JsonObject payloadJSON = _jsonDoc[PAYLOAD_KEY].to<JsonObject>();
+    JsonArray countdownTimersJSON = payloadJSON["countdown_timers"].to<JsonArray>();
+    JsonObject countdownTimerJSON;
+    for (int i=0;i<NUMBER_OF_RELAYS;i++) {
+        // if in countdown mode and countdown is ongoing
+        if (_eC->getOperationMode(i) == RELAY_COUNTDOWN) {
+            countdownTimerJSON = countdownTimersJSON.add<JsonObject>();
+            countdownTimerJSON["index"] = i;
+            countdownTimerJSON["time_remaining"] = _eC->getCountdownTimerTimeRemaining(i);
+        }
+    }
+    serializeJson(_jsonDoc, _strData);
+    Serial.printf("serialized JSON = %s\n", _strData);
+    _ws.textAll(_strData);
+}
+
 // method to handle requests from the client browser 
 void WebserverModule::handleRequest(String type, JsonDocument payloadJSON) {
     if (type == CONNECTION_TYPE) {

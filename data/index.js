@@ -1,11 +1,5 @@
 /*
 TODO: 
-    change LED behavior to:
-        Off: LED is totally off
-        On: LED is totally on
-        Blinking: LED blinks the current operation mode periodically, but is mostly off when the relay is off 
-            and mostly on when the relay is on.
-    add a time remaining countdown beside each relay which appears when countdown mode and relay is activated
 */
 import * as wsMod from './wsMod.js';
 
@@ -34,6 +28,7 @@ document.addEventListener("DOMContentLoaded", function() {
     let relayStateTemplate = document.getElementById("relayStateTemplate");
     let relayStatesTable = document.getElementById("relayStatesTable");
     let relayStates = relayStatesTable.getElementsByClassName('relayState');
+    
     // relay status indicator and text
     // const relayStatusTextOutput = document.getElementById("relayStatusText");
     // const relayStatusIndicator = document.getElementById("relayStatusIndicator");
@@ -285,7 +280,7 @@ document.addEventListener("DOMContentLoaded", function() {
     
     // change eventListener for countdown duration input
     countdownDurationInput.addEventListener('change', () => {
-        relayConfigs[curIndex].countdownDurationSetting = countdownDurationInput.value;
+        relayConfigs[curIndex].countdownDurationSetting = countdownDurationInput.value * 1000;
     });
 
     // click eventListener for countdown start/stop button
@@ -303,6 +298,7 @@ document.addEventListener("DOMContentLoaded", function() {
         // current relay index value
         console.log(`curindex=${curIndex}`);
         wsMod.saveRelayConfigs(ws, relayConfigs[curIndex]);
+        setCountdownTimerVisibility();
         // disable relay config button after saving
         saveRelayConfigBtn.disabled = true;
         console.log("save relay config");
@@ -357,7 +353,15 @@ document.addEventListener("DOMContentLoaded", function() {
             countdownDurationSetting: 0,
         }
     ];
-
+    // countdown timers
+    let relayCountdownTimers = {
+        countdown_timers: [
+            {
+                index: 0,
+                timeRemaining: 0,    
+            },
+        ]
+    };
     
     /*
     Websocket 
@@ -385,6 +389,7 @@ document.addEventListener("DOMContentLoaded", function() {
                 "relay_states": updateDisplayedRelayStates,
                 "main_config": receiveMainConfigCallback,
                 "relay_configs": receiveRelayConfigsCallback,
+                "countdown_timers": receiveCountdownTimersCallback,
             }
             wsMod.receiveData(event, callbacks);
         });
@@ -417,7 +422,6 @@ document.addEventListener("DOMContentLoaded", function() {
         for (let i=0;i<3;i++) {
             console.log(i);
             let newRelayState = relayStateTemplate.cloneNode(true);
-            console.log(`newrelayState = ${newRelayState}`);
             newRelayState.classList.add('relayState');
             newRelayState.dataset.index = i;
             newRelayState.style.display = "block";
@@ -491,6 +495,11 @@ document.addEventListener("DOMContentLoaded", function() {
         updateRelayConfigsDisplay(curIndex);
     }
 
+    function receiveCountdownTimersCallback(payload) {
+        relayCountdownTimers = payload;
+        updateCountdownTimerDisplay();
+    }
+
     /**
      * update current relay display
      * @param {Number} index - current selected relay index curIndex
@@ -543,11 +552,42 @@ document.addEventListener("DOMContentLoaded", function() {
         }
         // set callbacks for all timeslot elements
         setTimeSlotsCallbacks();
+
         // get countdown duration value 
-        countdownDurationInput.value = relayConfigs[index]["countdownDurationSetting"];
-        
+        countdownDurationInput.value = relayConfigs[index]["countdownDurationSetting"] / 1000;
+        setCountdownTimerVisibility(index);
     }
     
+    /**
+     * for each countdown timer whether running or stopped, update the displayed remaining time.
+     */
+    function updateCountdownTimerDisplay() {
+        for (const relayCountdownTimer of relayCountdownTimers["countdown_timers"]) {
+            // console.log(`relayCountdownTimer index=${relayCountdownTimer["index"]}, time_remaining=${relayCountdownTimer["time_remaining"]}`);
+            const index = relayCountdownTimer["index"];
+            const timeRemaining = relayCountdownTimer["time_remaining"];
+            let relayCountdownDiv = relayStates[index].getElementsByClassName('relayCountdown')[0];
+            let relayCountdownValue = relayCountdownDiv.getElementsByClassName('relayCountdownValue')[0];
+            relayCountdownValue.textContent = parseInt(timeRemaining / 1000);
+        }
+    }
+
+    /** 
+     * make the countdown value display for each relay visible if the respective relay is in 
+     * countdown mode, and invisible otherwise.
+     */
+    function setCountdownTimerVisibility() {
+        for (let i=0;i<relayConfigs.length;i++) {
+            let relayCountdownDiv = relayStates[i].getElementsByClassName('relayCountdown')[0];
+            if (relayConfigs[i].operationModeSetting == 3) {
+                relayCountdownDiv.style.display = "table-cell";
+            } else {
+                relayCountdownDiv.style.display = "none";
+            }
+        }
+    }
+
+
     /**
      * Calculate duration of a timeslot in seconds given the start and end times 
      * of the day.

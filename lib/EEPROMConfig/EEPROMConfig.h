@@ -148,7 +148,7 @@ class EEPROMConfig {
         bool checkCountdownTimer(int rIndex, unsigned long min_ms = 100);
         void pauseCountdownTimer(int rIndex);
         void unpauseCountdownTimer(int rIndex);
-
+        long getCountdownTimerTimeRemaining(int rIndex);
     private:
         unsigned int _eepromAddr, _connectionConfigAddr, _mainConfigAddr, _relayConfigAddrs[NUMBER_OF_RELAYS], _magicNumberAddr;
         eepromConfig _eC;

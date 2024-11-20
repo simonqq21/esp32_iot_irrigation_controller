@@ -448,7 +448,7 @@ bool EEPROMConfig::checkCountdownTimer(int rIndex, unsigned long min_ms) {
         unsigned long timeDifference = millis() - countdownTimerVars[rIndex].lastTimeChecked;
         countdownTimerVars[rIndex].timeRemaining -= timeDifference;
         countdownTimerVars[rIndex].lastTimeChecked = millis();
-        Serial.printf("timeRemaining=%d\n", countdownTimerVars[rIndex].timeRemaining);
+        // Serial.printf("timeRemaining=%d\n", countdownTimerVars[rIndex].timeRemaining);
         return (countdownTimerVars[rIndex].timeRemaining > 0)? 1:0;
     }
     else {
@@ -462,4 +462,8 @@ void EEPROMConfig::pauseCountdownTimer(int rIndex) {
 
 void EEPROMConfig::unpauseCountdownTimer(int rIndex) {
     countdownTimerVars[rIndex].pause = false;
+}
+
+long EEPROMConfig::getCountdownTimerTimeRemaining(int rIndex) {
+    return countdownTimerVars[rIndex].timeRemaining;
 }

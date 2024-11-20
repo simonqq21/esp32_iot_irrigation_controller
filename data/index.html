@@ -19,7 +19,7 @@
                 <span id="systemTime">2000-01-01T00:00:00Z</span>
             </div>
             <div id="relayStatesDiv">
-                <div>Relay state: </div>
+                <div>Relay states: </div>
                 <table>
                     <tbody id="relayStatesTable">
                         <tr id="relayStateTemplate" style="display: none">
@@ -30,6 +30,11 @@
                             </td>
                             <td><span class="relayStatusIndicator on"></span></td>
                             <td class="relayStatusText">On</td>
+                            <td class="relayCountdown" style="display:none">
+                                <span>, </span>
+                                <span class="relayCountdownValue">0</span>
+                                <span> seconds remaining.</span>
+                            </td>
                         </tr>
                     </tbody>
                 </table>
@@ -76,9 +81,9 @@
             <div id="relayIndexSelectorDiv">
                 <span>Select relay: </span>
                 <select name="relayIndexSelector" id="relayIndexSelector">
-                    <option value="0">Relay 1</option>
-                    <option value="1">Relay 2</option>
-                    <option value="2">Relay 3</option>
+                    <option value="0">Relay 0</option>
+                    <option value="1">Relay 1</option>
+                    <option value="2">Relay 2</option>
                 </select>
             </div>
             <div>
