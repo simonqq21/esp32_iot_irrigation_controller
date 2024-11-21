@@ -3,6 +3,7 @@
 #include <Arduino.h>
 #include <FS.h>
 #include <LittleFS.h>
+#include <esp_wifi.h>
 #include <WiFi.h>
 #include "ESPAsyncWebServer.h"
 #include "AsyncTCP.h"
