@@ -233,7 +233,6 @@ document.addEventListener("DOMContentLoaded", function() {
                         relayConfigs[curIndex].timeSlots[tsIndex].onStartTime,
                         relayConfigs[curIndex].timeSlots[tsIndex].onEndTime
                     );
-                    console.log(relayConfigs[curIndex].timeSlots[tsIndex].duration);
                     element.parentElement.parentElement.getElementsByClassName("timeSlotDuration")[0]
                         .value = relayConfigs[curIndex].timeSlots[tsIndex].duration;
                     // console.log(JSON.stringify(config));
