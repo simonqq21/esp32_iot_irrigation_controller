@@ -84,8 +84,8 @@ void WebserverModule::connect() {
     IPAddress subnet(255,255,255,0);
     IPAddress dns(8,8,8,8);
     WiFi.mode(WIFI_STA);
-    esp_wifi_set_ps(WIFI_PS_NONE);
-    WiFi.setSleep(false);
+    // esp_wifi_set_ps(WIFI_PS_NONE);
+    // WiFi.setSleep(true);
     delay(100);
     WiFi.begin(_eC->getSSID().c_str(), _eC->getPassword().c_str());
     delay(3000);
